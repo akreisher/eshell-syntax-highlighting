@@ -1,0 +1,4 @@
+#+TITLE: Eshell Syntax Highlighting
+#+AUTHOR: Alex Kreisher
+
+Eshell Syntax Highlighting
