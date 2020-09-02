@@ -33,11 +33,8 @@
 (eval-when-compile
   (require 'cl-lib)
   (require 'esh-mode)
-  (require 'eshell))
-
-(require 'esh-util)
-(require 'misc)
-(require 'seq)
+  (require 'eshell)
+  (require 'em-alias))
 
 ;;;###autoload
 (progn
@@ -58,6 +55,11 @@
 
 (defface eshell-syntax-highlighting-comment-face
 		 '((t :foreground "gray" ))
+  "Face used for environment variables in an eshell command."
+  :group 'eshell-syntax-highlighting)
+
+(defface eshell-syntax-highlighting-string-face
+		 '((t :foreground "yellow" ))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
@@ -99,6 +101,8 @@
 	(add-face-text-property beg end 'eshell-syntax-highlighting-lisp-function-face))
    ((eq type 'directory)
 	(add-face-text-property beg end 'eshell-syntax-highlighting-directory-face))
+   ((eq type 'string)
+	(add-face-text-property beg end 'eshell-syntax-highlighting-string-face))
    ((eq type 'comment)
 	(add-face-text-property beg end 'eshell-syntax-highlighting-comment-face))
    ((eq type 'invalid)
@@ -111,7 +115,7 @@
   "Parse and highlight words."
 
   ;; Skip whitespace
-  (when (looking-at "\\s-*") (goto-char (match-end 0)))          
+  (when (looking-at "\\s-*") (goto-char (match-end 0)))
 
   (let ((beg (point)))
 	(cond
@@ -155,20 +159,20 @@
 		 ;; Prioritized lisp function
 		 ((and eshell-prefer-lisp-functions (functionp (intern word)))
 		  (eshell-syntax-highlighting--highlight beg (point) 'lisp)
-		  (eshell-syntax-highlighting--parse-and-highlight 'argument)) 
-		 
+		  (eshell-syntax-highlighting--parse-and-highlight 'argument))
+
 		 ;; Executable
 		 ((or (executable-find word)
 			  (and (file-regular-p word) (file-executable-p word)))
 			(eshell-syntax-highlighting--highlight beg (point) 'command)
 			(eshell-syntax-highlighting--parse-and-highlight 'argument))
-			
+
 		 ;; Eshell aliases
-		 ((or (seq-contains-p (eshell-alias-completions "") word)
-			 (functionp (intern (concat "eshell/" word))))
+		 ((or (eshell-lookup-alias word)
+			  (functionp (intern (concat "eshell/" word))))
 		  (eshell-syntax-highlighting--highlight beg (point) 'alias)
 		  (eshell-syntax-highlighting--parse-and-highlight 'argument))
-		 
+
 		 ;; Lisp
 		 ((functionp (intern word))
 		  (eshell-syntax-highlighting--highlight beg (point) 'lisp)
@@ -178,7 +182,7 @@
 		 ((string-prefix-p "(" word)
 		  (eshell-syntax-highlighting--highlight beg (point-max) 'default)
 		  (eshell-syntax-highlighting--parse-and-highlight 'argument))
-		
+
 		 ;; Directory for cd
 		 ((and eshell-cd-on-directory (file-directory-p word))
 		  (eshell-syntax-highlighting--highlight beg (point) 'directory)
@@ -190,9 +194,22 @@
 		  (eshell-syntax-highlighting--parse-and-highlight 'argument)))))
 
 	 ((eq expected 'argument)
-	  (search-forward-regexp "\\S-*" (line-end-position))
-	  (eshell-syntax-highlighting--highlight beg (point) 'default)
-	  (eshell-syntax-highlighting--parse-and-highlight 'argument)))))
+	  (cond
+
+	   ;; Quoted string
+	   ((looking-at "\\(\"\\|'\\)")
+		(unless
+			(re-search-forward
+			 (concat "\\(\\`\\|[^\\\\]\\)" (match-string 1)) nil t)
+		  (goto-char (point-max)))
+		(eshell-syntax-highlighting--highlight beg (point) 'string)
+		(eshell-syntax-highlighting--parse-and-highlight 'argument))
+
+	   ;; Argument
+	   (t
+		(search-forward-regexp "\\S-*" (line-end-position))
+		(eshell-syntax-highlighting--highlight beg (point) 'default)
+		(eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
 
 (defun eshell-syntax-highlighting--highlight-command ()
@@ -207,17 +224,22 @@
 (defun eshell-syntax-highlighting-enable ()
   "Enable highlighting of eshell commands."
   (interactive)
-  (add-hook 'eshell-mode-hook
-			(lambda ()
-			  (add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command t t))))
+  (when (eq major-mode 'eshell-mode)
+	(add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command nil t))
+  (add-hook
+   'eshell-mode-hook
+   (lambda () (add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command nil t))))
 
 (defun eshell-syntax-highlighting-disable ()
   "Enable highlighting of eshell commands."
   (interactive)
-  (remove-hook 'eshell-mode-hook
-			(lambda ()
-			  (add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command t t))))
-    
+  (when (eq major-mode 'eshell-mode)
+	(remove-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command t))
+  (remove-hook
+   'eshell-mode-hook
+   (lambda () (add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command nil t))))
+
+
 
 (provide 'eshell-syntax-highlighting)
 ;;; eshell-syntax-highlighting.el ends here
