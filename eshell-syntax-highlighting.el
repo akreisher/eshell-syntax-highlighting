@@ -122,7 +122,7 @@
      beg (point)
      (if (and (match-string 1 command)
               (string-equal (match-string 1 command) "eshell/"))
-         'lispx
+         'lisp
        'command))
     (eshell-syntax-highlighting--parse-and-highlight 'command))
 

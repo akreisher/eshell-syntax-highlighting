@@ -21,7 +21,6 @@ Then, in your init.el:
 
 ;; Alternatively, with use-package and lazy loading
 (use-package eshell-syntax-highlighting
-  :defer t
   :after esh-mode
   :load-path "<path-to-eshell-syntax-highlighting-repository>"
   :config (eshell-syntax-highlighting-enable))
