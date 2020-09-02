@@ -36,6 +36,9 @@
   (require 'eshell)
   (require 'em-alias))
 
+(require 'esh-util)
+
+
 ;;;###autoload
 (progn
 (defgroup eshell-syntax-highlighting nil
@@ -111,7 +114,7 @@
    ;; Environment variabale
    ((string-match "[a-zA-Z0-9_]+=.*" command)
 	(eshell-syntax-highlighting--highlight beg (point) 'envvar)
-	(eshell-syntax-highlighting--parse-and-highlight expected))
+	(eshell-syntax-highlighting--parse-and-highlight 'command))
 
    ;; Forced external command
    ((and (string-prefix-p "*" command)

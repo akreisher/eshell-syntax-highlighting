@@ -2,7 +2,7 @@
 
 ** Introduction
 
-This package aims to provide feedback over the validity of eshell commandsyntax through highlighting.
+This package aims to provide feedback over the validity of eshell command syntax through colorful highlighting.
 
 It is inspired by [[https://github.com/zsh-users/zsh-syntax-highlighting][zsh-syntax-highlighting]] and the native highlighting of [[https://fishshell.com/][fish]].
 
@@ -29,8 +29,6 @@ Then, in your init.el:
 
 Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting, and ~(eshell-syntax-highlighting-disable)~ to disable it.
 
-To customize the faces used for highlighting, you can use ~M-x customize-group eshell-syntax-highlighting~.
+To customize the faces used for highlighting, you can use
 
-** Notes
-
-Personally, I have not had issues running this. Since this code uses ~post-command-hook~, there is a possibility this may result in poor performance when typing at the eshell-prompt on slower systems.
+    ~M-x customize-group eshell-syntax-highlighting~.
