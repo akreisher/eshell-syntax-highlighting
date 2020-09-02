@@ -4,7 +4,7 @@
 
 ;; Author: Alex Kreisher <akreisher18@gmail.com>
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: processes
 ;; URL: https://github.com/akreisher/eshell-syntax-highlighting
 
