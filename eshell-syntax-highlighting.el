@@ -92,7 +92,7 @@
   :group 'eshell-syntax-highlighting)
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
-  "Highlight word from beg to end based on type"
+  "Highlight word from BEG to END based on TYPE."
   (let ((face
          (cond
           ((eq type 'default) 'eshell-syntax-highlighting-default-face)
@@ -109,7 +109,7 @@
 
 
 (defun eshell-syntax-highlighting--parse-command (beg command)
-  "Parse a command and dispatch to highlighting and continued parsing."
+  "Parse COMMAND starting at BEG and dispatch to highlighting and continued parsing."
   (cond
    ;; Environment variabale
    ((string-match "[a-zA-Z0-9_]+=.*" command)
@@ -160,7 +160,7 @@
 
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected)
-  "Parse and highlight from point."
+  "Parse and highlight from point, expecting token of type EXPECTED."
 
   ;; Skip whitespace
   (when (looking-at "\\s-*") (goto-char (match-end 0)))
@@ -228,12 +228,12 @@
 (defun eshell-syntax-highlighting-enable ()
   "Enable highlighting of eshell commands."
   (interactive)
-  (add-hook 'eshell-mode-hook 'eshell-syntax-highlighting--enable-highlighting))
+  (add-hook 'eshell-mode-hook #'eshell-syntax-highlighting--enable-highlighting))
 
 (defun eshell-syntax-highlighting-disable ()
   "Disable highlighting of eshell commands."
   (interactive)
-  (remove-hook 'eshell-mode-hook 'eshell-syntax-highlighting--enable-highlighting))
+  (remove-hook 'eshell-mode-hook #'eshell-syntax-highlighting--enable-highlighting))
 
 
 
