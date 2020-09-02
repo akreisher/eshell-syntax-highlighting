@@ -47,65 +47,65 @@
   :group 'eshell-module))
 
 (defface eshell-syntax-highlighting-default-face
-		 '((t :inherit 'default ))
+         '((t :inherit 'default ))
   "Default face for eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-envvar-face
-		 '((t :foreground "orange" ))
+         '((t :foreground "orange" ))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-comment-face
-		 '((t :foreground "gray" :weight bold))
+         '((t :foreground "gray" :weight bold))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
-		 '((t :inherit 'font-lock-string-face))
+         '((t :inherit 'font-lock-string-face))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-shell-command-face
-		 '((t :foreground "green" ))
+         '((t :foreground "green" ))
   "Face used for valid shell in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-lisp-function-face
-		 '((t :foreground "yellow" ))
+         '((t :foreground "yellow" ))
   "Face used for elisp functions."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-alias-face
-		 '((t :inherit 'eshell-syntax-highlighting-shell-command-face ))
+         '((t :inherit 'eshell-syntax-highlighting-shell-command-face ))
   "Face used for eshell aliases."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-invalid-face
-		 '((t :foreground "red" ))
+         '((t :foreground "red" ))
   "Face used for invalid eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-directory-face
-		 '((t :foreground "cyan" ))
+         '((t :foreground "cyan" ))
   "Face used for directory commands in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from beg to end based on type"
   (let ((face
-		 (cond
-		  ((eq type 'default) 'eshell-syntax-highlighting-default-face)
-		  ((eq type 'command) 'eshell-syntax-highlighting-shell-command-face)
-		  ((eq type 'alias) 'eshell-syntax-highlighting-alias-face)
-		  ((eq type 'lisp) 'eshell-syntax-highlighting-lisp-function-face)
-		  ((eq type 'string) 'eshell-syntax-highlighting-string-face)
-		  ((eq type 'invalid) 'eshell-syntax-highlighting-invalid-face)
-		  ((eq type 'envvar) 'eshell-syntax-highlighting-envvar-face)
-		  ((eq type 'directory) 'eshell-syntax-highlighting-directory-face)
-		  ((eq type 'comment) 'eshell-syntax-highlighting-comment-face)
-		  (t 'eshell-syntax-highlighting-default-face))))
-	(add-face-text-property beg end face)))
+         (cond
+          ((eq type 'default) 'eshell-syntax-highlighting-default-face)
+          ((eq type 'command) 'eshell-syntax-highlighting-shell-command-face)
+          ((eq type 'alias) 'eshell-syntax-highlighting-alias-face)
+          ((eq type 'lisp) 'eshell-syntax-highlighting-lisp-function-face)
+          ((eq type 'string) 'eshell-syntax-highlighting-string-face)
+          ((eq type 'invalid) 'eshell-syntax-highlighting-invalid-face)
+          ((eq type 'envvar) 'eshell-syntax-highlighting-envvar-face)
+          ((eq type 'directory) 'eshell-syntax-highlighting-directory-face)
+          ((eq type 'comment) 'eshell-syntax-highlighting-comment-face)
+          (t 'eshell-syntax-highlighting-default-face))))
+    (add-face-text-property beg end face)))
 
 
 (defun eshell-syntax-highlighting--parse-command (beg command)
@@ -113,50 +113,50 @@
   (cond
    ;; Environment variabale
    ((string-match "[a-zA-Z0-9_]+=.*" command)
-	(eshell-syntax-highlighting--highlight beg (point) 'envvar)
-	(eshell-syntax-highlighting--parse-and-highlight 'command))
+    (eshell-syntax-highlighting--highlight beg (point) 'envvar)
+    (eshell-syntax-highlighting--parse-and-highlight 'command))
 
    ;; Forced external command
    ((and (string-prefix-p "*" command)
-		 (executable-find (substring command 1 nil)))
-	(eshell-syntax-highlighting--highlight beg (point) 'command)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+         (executable-find (substring command 1 nil)))
+    (eshell-syntax-highlighting--highlight beg (point) 'command)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Prioritized lisp function
    ((and eshell-prefer-lisp-functions (functionp (intern command)))
-	(eshell-syntax-highlighting--highlight beg (point) 'lisp)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+    (eshell-syntax-highlighting--highlight beg (point) 'lisp)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Executable
    ((or (executable-find command)
-		(and (file-regular-p command) (file-executable-p command)))
-	(eshell-syntax-highlighting--highlight beg (point) 'command)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+        (and (file-regular-p command) (file-executable-p command)))
+    (eshell-syntax-highlighting--highlight beg (point) 'command)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Eshell aliases
    ((or (eshell-lookup-alias command)
-		(functionp (intern (concat "eshell/" command))))
-	(eshell-syntax-highlighting--highlight beg (point) 'alias)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+        (functionp (intern (concat "eshell/" command))))
+    (eshell-syntax-highlighting--highlight beg (point) 'alias)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Lisp
    ((functionp (intern command))
-	(eshell-syntax-highlighting--highlight beg (point) 'lisp)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+    (eshell-syntax-highlighting--highlight beg (point) 'lisp)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Parenthesized lisp
    ((string-prefix-p "(" command)
-	(eshell-syntax-highlighting--highlight beg (point-max) 'default))
+    (eshell-syntax-highlighting--highlight beg (point-max) 'default))
 
    ;; Directory for cd
    ((and eshell-cd-on-directory (file-directory-p command))
-	(eshell-syntax-highlighting--highlight beg (point) 'directory)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+    (eshell-syntax-highlighting--highlight beg (point) 'directory)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Invalid command
    (t
-	(eshell-syntax-highlighting--highlight beg (point) 'invalid)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))))
+    (eshell-syntax-highlighting--highlight beg (point) 'invalid)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))))
 
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected)
@@ -166,50 +166,50 @@
   (when (looking-at "\\s-*") (goto-char (match-end 0)))
 
   (let ((beg (point)))
-	(cond
-	 ;; Exit at eol
-	 ((eolp) nil)
+    (cond
+     ;; Exit at eol
+     ((eolp) nil)
 
-	 ;; Comments
-	 ((looking-at "#")
-	  (eshell-syntax-highlighting--highlight beg (point-max) 'comment))
+     ;; Comments
+     ((looking-at "#")
+      (eshell-syntax-highlighting--highlight beg (point-max) 'comment))
 
-	 ;; Line-wrapping backslash
-	 ((looking-at "\\\\\n")
-	  (goto-char (match-end 0))
-	  (eshell-syntax-highlighting--highlight beg (point) 'default)
-	  (eshell-syntax-highlighting--parse-and-highlight expected))
+     ;; Line-wrapping backslash
+     ((looking-at "\\\\\n")
+      (goto-char (match-end 0))
+      (eshell-syntax-highlighting--highlight beg (point) 'default)
+      (eshell-syntax-highlighting--parse-and-highlight expected))
 
-	 ;; Delimiters
-	 ((looking-at "[&|;]")
-	  (goto-char (match-end 0))
-	  (if (eq 'expected 'command)
-		  (eshell-syntax-highlighting--highlight beg (point) 'invalid)
-		(eshell-syntax-highlighting--highlight beg (point) 'default))
-	  (eshell-syntax-highlighting--parse-and-highlight 'command))
+     ;; Delimiters
+     ((looking-at "[&|;]")
+      (goto-char (match-end 0))
+      (if (eq 'expected 'command)
+          (eshell-syntax-highlighting--highlight beg (point) 'invalid)
+        (eshell-syntax-highlighting--highlight beg (point) 'default))
+      (eshell-syntax-highlighting--parse-and-highlight 'command))
 
-	 ;; Commands
-	 ((eq expected 'command)
-	  (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
-	  (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))
+     ;; Commands
+     ((eq expected 'command)
+      (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
+      (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))
 
-	 (t
-	  (cond
+     (t
+      (cond
 
-	   ;; Quoted string
-	   ((looking-at "[\"']")
-		(unless
-			(re-search-forward
-			 (concat "\\(\\`\\|[^\\\\]\\)" (match-string 0)) nil t)
-		  (goto-char (point-max)))
-		(eshell-syntax-highlighting--highlight beg (point) 'string)
-		(eshell-syntax-highlighting--parse-and-highlight 'argument))
+       ;; Quoted string
+       ((looking-at "[\"']")
+        (unless
+            (re-search-forward
+             (concat "\\(\\`\\|[^\\\\]\\)" (match-string 0)) nil t)
+          (goto-char (point-max)))
+        (eshell-syntax-highlighting--highlight beg (point) 'string)
+        (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
-	   ;; Argument
-	   (t
-		(search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
-		(eshell-syntax-highlighting--highlight beg (point) 'default)
-		(eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
+       ;; Argument
+       (t
+        (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
+        (eshell-syntax-highlighting--highlight beg (point) 'default)
+        (eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
@@ -217,12 +217,12 @@
   (add-hook
    'post-command-hook
    (lambda ()
-	 (when (eq major-mode 'eshell-mode)
-	   (save-excursion
-		 (goto-char eshell-last-output-end)
-		 (forward-line 0)
-		 (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-		   (eshell-syntax-highlighting--parse-and-highlight 'command)))))))
+     (when (eq major-mode 'eshell-mode)
+       (save-excursion
+         (goto-char eshell-last-output-end)
+         (forward-line 0)
+         (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
+           (eshell-syntax-highlighting--parse-and-highlight 'command)))))))
 
 
 (defun eshell-syntax-highlighting-enable ()
