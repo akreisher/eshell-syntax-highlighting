@@ -119,8 +119,8 @@
 
   (let ((beg (point)))
 	(cond
-	 ;; Exit at eob
-	 ((eobp) nil)
+	 ;; Exit at eol
+	 ((eolp) nil)
 
 	 ;; Comments
 	 ((looking-at "#")
@@ -133,7 +133,7 @@
 	  (eshell-syntax-highlighting--parse-and-highlight expected))
 
 	 ;; Delimiters
-	 ((looking-at "\\(&\\||\\|;\\)")
+	 ((looking-at "[&|;]")
 	  (goto-char (match-end 0))
 	  (if (eq 'expected 'command)
 		  (eshell-syntax-highlighting--highlight beg (point) 'invalid)
@@ -142,7 +142,7 @@
 
 	 ;; Commands
 	 ((eq expected 'command)
-	  (search-forward-regexp "\\S-*" (line-end-position))
+	  (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
 	  (let ((word (match-string-no-properties 0)))
 		(cond
 		 ;; Environment variabale
@@ -197,17 +197,17 @@
 	  (cond
 
 	   ;; Quoted string
-	   ((looking-at "\\(\"\\|'\\)")
+	   ((looking-at "[\"']")
 		(unless
 			(re-search-forward
-			 (concat "\\(\\`\\|[^\\\\]\\)" (match-string 1)) nil t)
+			 (concat "\\(\\`\\|[^\\\\]\\)" (match-string 0)) nil t)
 		  (goto-char (point-max)))
 		(eshell-syntax-highlighting--highlight beg (point) 'string)
 		(eshell-syntax-highlighting--parse-and-highlight 'argument))
 
 	   ;; Argument
 	   (t
-		(search-forward-regexp "\\S-*" (line-end-position))
+		(search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
 		(eshell-syntax-highlighting--highlight beg (point) 'default)
 		(eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
