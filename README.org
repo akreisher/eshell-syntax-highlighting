@@ -1,4 +1,36 @@
-#+TITLE: Eshell Syntax Highlighting
-#+AUTHOR: Alex Kreisher
+* =Eshell Syntax Highlighting=
 
-Eshell Syntax Highlighting
+** Introduction
+
+This package aims to provide feedback over the validity of eshell commandsyntax through highlighting.
+
+It is inspired by [[https://github.com/zsh-users/zsh-syntax-highlighting][zsh-syntax-highlighting]] and the native highlighting of [[https://fishshell.com/][fish]].
+
+** Installation
+
+To install this package, clone this repository.
+Then, in your init.el:
+#+BEGIN_SRC emacs-lisp
+;; Using standard emacs loading
+(add-to-list 'load-path "<path-to-eshell-syntax-highlighting-repository>")
+(require 'eshell-syntax-highlighting)
+;; Use this to enable syntax highlighting by default
+(eshell-syntax-highlighting-enable)
+
+;; Alternatively, with use-package and lazy loading
+(use-package eshell-syntax-highlighting
+  :defer t
+  :after esh-mode
+  :load-path "<path-to-eshell-syntax-highlighting-repository>"
+  :config (eshell-syntax-highlighting-enable))
+#+END_SRC
+
+** Usage
+
+Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting, and ~(eshell-syntax-highlighting-disable)~ to disable it.
+
+To customize the faces used for highlighting, you can use ~M-x customize-group eshell-syntax-highlighting~.
+
+** Notes
+
+Personally, I have not had issues running this. Since this code uses ~post-command-hook~, there is a possibility this may result in poor performance when typing at the eshell-prompt on slower systems.
