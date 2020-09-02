@@ -4,6 +4,8 @@
 
 This package aims to provide feedback over the validity of eshell command syntax through colorful highlighting.
 
+[[./img/eshell-syntax-highlighting.gif]]
+
 It is inspired by [[https://github.com/zsh-users/zsh-syntax-highlighting][zsh-syntax-highlighting]] and the native highlighting of [[https://fishshell.com/][fish]].
 
 ** Installation

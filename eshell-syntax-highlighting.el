@@ -146,8 +146,7 @@
 
    ;; Parenthesized lisp
    ((string-prefix-p "(" command)
-	(eshell-syntax-highlighting--highlight beg (point-max) 'default)
-	(eshell-syntax-highlighting--parse-and-highlight 'argument))
+	(eshell-syntax-highlighting--highlight beg (point-max) 'default))
 
    ;; Directory for cd
    ((and eshell-cd-on-directory (file-directory-p command))
