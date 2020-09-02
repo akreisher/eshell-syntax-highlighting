@@ -197,19 +197,24 @@
 
 (defun eshell-syntax-highlighting--highlight-command ()
   "Parse and highlight command at the last eshell prompt."
-  (interactive)
-	(save-excursion
-	  (goto-char eshell-last-output-end)
-	  (forward-line 0)
-      (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-		(eshell-syntax-highlighting--parse-and-highlight 'command))))
+  (save-excursion
+	(goto-char eshell-last-output-end)
+	(forward-line 0)
+    (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
+	  (eshell-syntax-highlighting--parse-and-highlight 'command))))
 
 
-
-(defun eshell-syntax-highlighting-initialize ()
+(defun eshell-syntax-highlighting-enable ()
   "Enable highlighting of eshell commands."
   (interactive)
   (add-hook 'eshell-mode-hook
+			(lambda ()
+			  (add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command t t))))
+
+(defun eshell-syntax-highlighting-disable ()
+  "Enable highlighting of eshell commands."
+  (interactive)
+  (remove-hook 'eshell-mode-hook
 			(lambda ()
 			  (add-hook 'post-command-hook #'eshell-syntax-highlighting--highlight-command t t))))
     
