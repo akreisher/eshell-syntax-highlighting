@@ -54,12 +54,12 @@
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-comment-face
-		 '((t :foreground "gray" ))
+		 '((t :foreground "gray" :weight bold))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
-		 '((t :foreground "yellow" ))
+		 '((t :inherit 'font-lock-string-face))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
