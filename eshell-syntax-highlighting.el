@@ -116,6 +116,16 @@
     (eshell-syntax-highlighting--highlight beg (point) 'envvar)
     (eshell-syntax-highlighting--parse-and-highlight 'command))
 
+   ;; Sudo
+   ((string-match "\\(\\*\\|eshell/\\)?sudo" command)
+    (eshell-syntax-highlighting--highlight
+     beg (point)
+     (if (and (match-string 1 command)
+              (string-equal (match-string 1 command) "eshell/"))
+         'lispx
+       'command))
+    (eshell-syntax-highlighting--parse-and-highlight 'command))
+
    ;; Forced external command
    ((and (string-prefix-p "*" command)
          (executable-find (substring command 1 nil)))
@@ -228,12 +238,14 @@
 (defun eshell-syntax-highlighting-enable ()
   "Enable highlighting of eshell commands."
   (interactive)
-  (add-hook 'eshell-mode-hook #'eshell-syntax-highlighting--enable-highlighting))
+  (add-hook 'eshell-mode-hook
+            #'eshell-syntax-highlighting--enable-highlighting))
 
 (defun eshell-syntax-highlighting-disable ()
   "Disable highlighting of eshell commands."
   (interactive)
-  (remove-hook 'eshell-mode-hook #'eshell-syntax-highlighting--enable-highlighting))
+  (remove-hook 'eshell-mode-hook
+               #'eshell-syntax-highlighting--enable-highlighting))
 
 
 (provide 'eshell-syntax-highlighting)
