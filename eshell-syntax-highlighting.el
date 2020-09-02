@@ -5,7 +5,7 @@
 ;; Author: Alex Kreisher <akreisher18@gmail.com>
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "25.1"))
-;; Keywords: processes
+;; Keywords: convenience
 ;; URL: https://github.com/akreisher/eshell-syntax-highlighting
 
 ;; This file is NOT part of GNU Emacs.
@@ -224,7 +224,7 @@
          (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
            (eshell-syntax-highlighting--parse-and-highlight 'command)))))))
 
-
+;;;###autoload
 (defun eshell-syntax-highlighting-enable ()
   "Enable highlighting of eshell commands."
   (interactive)
@@ -234,7 +234,6 @@
   "Disable highlighting of eshell commands."
   (interactive)
   (remove-hook 'eshell-mode-hook #'eshell-syntax-highlighting--enable-highlighting))
-
 
 
 (provide 'eshell-syntax-highlighting)
