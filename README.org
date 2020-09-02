@@ -33,4 +33,4 @@ Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting, and ~(e
 
 To customize the faces used for highlighting, you can use
 
-    ~M-x customize-group eshell-syntax-highlighting~.
+    ~M-x customize-group eshell-syntax-highlighting~
