@@ -2,7 +2,7 @@
 
 ** Introduction
 
-This package adds syntax highlighting to eshell commands.
+This package adds syntax highlighting to the Emacs [[https://www.gnu.org/software/emacs/manual/html_node/eshell/][Eshell]].
 
 [[./img/eshell-syntax-highlighting.gif]]
 
