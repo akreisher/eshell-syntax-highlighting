@@ -2,7 +2,7 @@
 
 ** Introduction
 
-This package aims to provide feedback over the validity of eshell command syntax through colorful highlighting.
+This package adds syntax highlighting to eshell commands.
 
 [[./img/eshell-syntax-highlighting.gif]]
 
