@@ -28,7 +28,10 @@ Then, in your ~init.el~:
 
 ** Usage
 
-Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting, and ~(eshell-syntax-highlighting-disable)~ to disable it.
+Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting in all future eshell sessions,
+and ~(eshell-syntax-highlighting-disable)~ to undo this.
+
+You can enable and disable highlighting in an existing session with ~(eshell-syntax-highlighting-mode)~.
 
 To customize the faces used for highlighting, you can use
 
