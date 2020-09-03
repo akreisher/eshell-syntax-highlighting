@@ -25,8 +25,12 @@
 
 ;;; Commentary:
 ;;
-;; Highlight eshell commands based on syntax.
+;; Provides syntax highlighting of the eshell command at the current prompt.
 ;;
+;; TODO:
+;;   - [ ] Parse command/variable substitutions
+;;   - [ ] Parse for loops
+;;   - [ ] Use a temporary buffer to fontify elisp
 
 ;;; Code:
 
@@ -117,7 +121,7 @@
     (eshell-syntax-highlighting--parse-and-highlight 'command))
 
    ;; Sudo
-   ((string-match "\\(\\*\\|eshell/\\)?sudo" command)
+   ((string-match "^\\(\\*\\|eshell/\\)?sudo$" command)
     (eshell-syntax-highlighting--highlight
      beg (point)
      (if (and (match-string 1 command)
@@ -129,6 +133,11 @@
    ;; Forced external command
    ((and (string-prefix-p "*" command)
          (executable-find (substring command 1 nil)))
+    (eshell-syntax-highlighting--highlight beg (point) 'command)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
+
+   ;; Built-in
+   ((functionp (intern (concat "eshell/" command)))
     (eshell-syntax-highlighting--highlight beg (point) 'command)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
@@ -144,8 +153,7 @@
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Eshell aliases
-   ((or (eshell-lookup-alias command)
-        (functionp (intern (concat "eshell/" command))))
+   ((eshell-lookup-alias command)
     (eshell-syntax-highlighting--highlight beg (point) 'alias)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
@@ -173,8 +181,7 @@
   "Parse and highlight from point, expecting token of type EXPECTED."
 
   ;; Skip whitespace
-  (when (looking-at "\\s-*") (goto-char (match-end 0)))
-
+  (re-search-forward "\\s-*" nil t)
   (let ((beg (point)))
     (cond
      ;; Exit at eol
