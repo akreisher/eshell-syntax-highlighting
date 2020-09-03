@@ -34,7 +34,7 @@ To customize the faces used for highlighting, you can use
 
     ~M-x customize-group eshell-syntax-highlighting~
 
-** TODO
+** Todo
 
 - [ ] Parse for loops
 - [ ] Fontify lisp with temp buffer
