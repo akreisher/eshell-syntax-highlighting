@@ -25,12 +25,11 @@
 
 ;;; Commentary:
 ;;
-;; Provides syntax highlighting of the eshell command at the current prompt.
+;; Provides syntax highlighting for Eshell.
 ;;
-;; TODO:
-;;   - [ ] Parse command/variable substitutions
-;;   - [ ] Parse for loops
-;;   - [ ] Use a temporary buffer to fontify elisp
+;; Highlights commands as the user type to validate commands and syntax.
+;;
+
 
 ;;; Code:
 
@@ -113,7 +112,6 @@
           (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
-
 (defun eshell-syntax-highlighting--parse-command (beg command)
   "Parse COMMAND starting at BEG and dispatch to highlighting and continued parsing."
   (cond
@@ -165,7 +163,13 @@
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Parenthesized lisp
+   ;; Disable highlighting from here on out
    ((string-prefix-p "(" command)
+    (eshell-syntax-highlighting--highlight beg (point-max) 'default))
+
+   ;; For loop
+   ;; Disable highlighting from here on out
+   ((string-equal "for" command)
     (eshell-syntax-highlighting--highlight beg (point-max) 'default))
 
    ;; Directory for cd
@@ -177,7 +181,6 @@
    (t
     (eshell-syntax-highlighting--highlight beg (point) 'invalid)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))))
-
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected)
   "Parse and highlight from point, expecting token of type EXPECTED."

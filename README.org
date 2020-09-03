@@ -2,16 +2,16 @@
 
 ** Introduction
 
-This package adds syntax highlighting to the Emacs [[https://www.gnu.org/software/emacs/manual/html_node/eshell/][Eshell]].
+This package adds syntax highlighting to the Emacs [[https://www.gnu.org/software/emacs/manual/html_node/eshell/][Eshell]]. It highlights user commands at the interactive prompt to provide feedback on the validity of commands and syntax.
 
 [[./img/eshell-syntax-highlighting.gif]]
 
-It is inspired by [[https://github.com/zsh-users/zsh-syntax-highlighting][zsh-syntax-highlighting]] and the native highlighting of [[https://fishshell.com/][fish]].
+This package is inspired by [[https://github.com/zsh-users/zsh-syntax-highlighting][zsh-syntax-highlighting]] and the native highlighting of [[https://fishshell.com/][fish]].
 
 ** Installation
 
 To install this package, clone this repository.
-Then, in your init.el:
+Then, in your ~init.el~:
 #+BEGIN_SRC emacs-lisp
 ;; Using vanilla emacs package loading
 (add-to-list 'load-path "<path-to-eshell-syntax-highlighting-repository>")
@@ -33,3 +33,9 @@ Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting, and ~(e
 To customize the faces used for highlighting, you can use
 
     ~M-x customize-group eshell-syntax-highlighting~
+
+** TODO
+
+- [ ] Parse for loops
+- [ ] Fontify lisp with temp buffer
+- [ ] Parse variable/command substitutions
