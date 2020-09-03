@@ -239,7 +239,8 @@
   (add-hook
    'post-command-hook
    (lambda ()
-     (when (eq major-mode 'eshell-mode)
+     (when (and (eq major-mode 'eshell-mode)
+                (not eshell-non-interactive-p))
        (save-excursion
          (goto-char eshell-last-output-end)
          (forward-line 0)
