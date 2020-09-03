@@ -13,13 +13,13 @@ It is inspired by [[https://github.com/zsh-users/zsh-syntax-highlighting][zsh-sy
 To install this package, clone this repository.
 Then, in your init.el:
 #+BEGIN_SRC emacs-lisp
-;; Using standard emacs loading
+;; Using vanilla emacs package loading
 (add-to-list 'load-path "<path-to-eshell-syntax-highlighting-repository>")
 (require 'eshell-syntax-highlighting)
 ;; Use this to enable syntax highlighting by default
 (eshell-syntax-highlighting-enable)
 
-;; Alternatively, with use-package and lazy loading
+;; Alternatively, with use-package
 (use-package eshell-syntax-highlighting
   :after esh-mode
   :load-path "<path-to-eshell-syntax-highlighting-repository>"
