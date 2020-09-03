@@ -38,7 +38,9 @@
   (require 'cl-lib)
   (require 'esh-mode)
   (require 'eshell)
-  (require 'em-alias))
+  (require 'em-alias)
+  (require 'em-dirs)
+  (require 'em-prompt))
 
 (require 'esh-util)
 
