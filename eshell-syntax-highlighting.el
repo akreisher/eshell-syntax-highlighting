@@ -261,11 +261,12 @@
 (define-minor-mode eshell-syntax-highlighting-mode
   "Toggle syntax highlighting for Eshell."
   nil nil nil
-  (funcall
-   (if (and eshell-syntax-highlighting-mode
+  (if (and eshell-syntax-highlighting-mode
             (eq major-mode 'eshell-mode))
-       'add-hook 'remove-hook)
-   'post-command-hook #'eshell-syntax-highlighting--enable-highlighting))
+      (add-hook 'post-command-hook
+				#'eshell-syntax-highlighting--enable-highlighting nil t)
+	(remove-hook 'post-command-hook
+				 #'eshell-syntax-highlighting--enable-highlighting t)))
 
 (provide 'eshell-syntax-highlighting)
 ;;; eshell-syntax-highlighting.el ends here
