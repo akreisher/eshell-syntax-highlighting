@@ -45,7 +45,7 @@
 
 
 (defgroup eshell-syntax-highlighting nil
-  "Faces used thehighlight the syntax of Eshell commands."
+  "Faces used to highlight the syntax of Eshell commands."
   :tag "Eshell Highlighting Faces"
   :group 'faces)
 
