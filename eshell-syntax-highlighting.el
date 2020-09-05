@@ -44,15 +44,13 @@
 (require 'esh-util)
 
 
-;;;###autoload
-(progn
 (defgroup eshell-syntax-highlighting nil
-  "This module provides syntax-highlighting of user entered commands."
-  :tag "Syntax highlighting"
-  :group 'eshell-module))
+  "Faces used thehighlight the syntax of Eshell commands."
+  :tag "Eshell Highlighting Faces"
+  :group 'faces)
 
 (defface eshell-syntax-highlighting-default-face
-         '((t :inherit 'default ))
+         '((t :inherit default))
   "Default face for eshell commands."
   :group 'eshell-syntax-highlighting)
 
@@ -62,37 +60,37 @@
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-comment-face
-         '((t :inherit 'font-lock-comment-face))
+         '((t :inherit font-lock-comment-face))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
-         '((t :inherit 'font-lock-string-face))
+         '((t :inherit font-lock-string-face))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-shell-command-face
-         '((t :inherit 'success))
+         '((t :inherit success))
   "Face used for valid shell in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-lisp-function-face
-         '((t :inherit 'font-lock-function-name-face))
+         '((t :inherit font-lock-function-name-face))
   "Face used for elisp functions."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-alias-face
-         '((t :inherit 'eshell-syntax-highlighting-shell-command-face))
+         '((t :inherit eshell-syntax-highlighting-shell-command-face))
   "Face used for eshell aliases."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-invalid-face
-         '((t :inherit 'error))
+         '((t :inherit error))
   "Face used for invalid eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-directory-face
-         '((t :inherit 'font-lock-type-face))
+         '((t :inherit font-lock-type-face))
   "Face used for directory commands in an eshell command."
   :group 'eshell-syntax-highlighting)
 
