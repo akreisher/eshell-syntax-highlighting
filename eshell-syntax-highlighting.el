@@ -57,12 +57,12 @@
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-envvar-face
-         '((t :foreground "orange" ))
+         '((t :inherit font-lock-variable-name-face))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-comment-face
-         '((t :foreground "gray" :weight bold))
+         '((t :inherit 'font-lock-comment-face))
   "Face used for environment variables in an eshell command."
   :group 'eshell-syntax-highlighting)
 
@@ -72,27 +72,27 @@
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-shell-command-face
-         '((t :foreground "green" ))
+         '((t :inherit 'success))
   "Face used for valid shell in an eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-lisp-function-face
-         '((t :foreground "yellow" ))
+         '((t :inherit 'font-lock-function-name-face))
   "Face used for elisp functions."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-alias-face
-         '((t :inherit 'eshell-syntax-highlighting-shell-command-face ))
+         '((t :inherit 'eshell-syntax-highlighting-shell-command-face))
   "Face used for eshell aliases."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-invalid-face
-         '((t :foreground "red" ))
+         '((t :inherit 'error))
   "Face used for invalid eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-directory-face
-         '((t :foreground "cyan" ))
+         '((t :inherit 'font-lock-type-face))
   "Face used for directory commands in an eshell command."
   :group 'eshell-syntax-highlighting)
 
@@ -264,9 +264,9 @@
   (if (and eshell-syntax-highlighting-mode
             (eq major-mode 'eshell-mode))
       (add-hook 'post-command-hook
-				#'eshell-syntax-highlighting--enable-highlighting nil t)
-	(remove-hook 'post-command-hook
-				 #'eshell-syntax-highlighting--enable-highlighting t)))
+                #'eshell-syntax-highlighting--enable-highlighting nil t)
+    (remove-hook 'post-command-hook
+                 #'eshell-syntax-highlighting--enable-highlighting t)))
 
 (provide 'eshell-syntax-highlighting)
 ;;; eshell-syntax-highlighting.el ends here

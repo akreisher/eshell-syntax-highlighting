@@ -28,14 +28,17 @@ Then, in your ~init.el~:
 
 ** Usage
 
-Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting in all future eshell sessions,
-and ~(eshell-syntax-highlighting-disable)~ to undo this.
+Use ~(eshell-syntax-highlighting-enable)~ to enable syntax highlighting in all future eshell sessions, and ~(eshell-syntax-highlighting-disable)~ to undo this.
 
-You can enable and disable highlighting in an existing session with ~(eshell-syntax-highlighting-mode)~.
+You can toggle highlighting in an existing session with ~(eshell-syntax-highlighting-mode)~.
 
-To customize the faces used for highlighting, you can use
+** Customization
+
+Faces in this package inherit from standard faces to match your theming. If this results in ambiguous highlighting (e.g. your ~font-lock-function-name-face~ is red), or if you just want to customize the coloring,  you can use
 
     ~M-x customize-group eshell-syntax-highlighting~
+
+to customize the faces used by this package.
 
 ** Todo
 
