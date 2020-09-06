@@ -97,17 +97,17 @@
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from BEG to END based on TYPE."
   (let ((face
-         (cond
-          ((eq type 'default) 'eshell-syntax-highlighting-default-face)
-          ((eq type 'command) 'eshell-syntax-highlighting-shell-command-face)
-          ((eq type 'alias) 'eshell-syntax-highlighting-alias-face)
-          ((eq type 'lisp) 'eshell-syntax-highlighting-lisp-function-face)
-          ((eq type 'string) 'eshell-syntax-highlighting-string-face)
-          ((eq type 'invalid) 'eshell-syntax-highlighting-invalid-face)
-          ((eq type 'envvar) 'eshell-syntax-highlighting-envvar-face)
-          ((eq type 'directory) 'eshell-syntax-highlighting-directory-face)
-          ((eq type 'comment) 'eshell-syntax-highlighting-comment-face)
-          (t 'eshell-syntax-highlighting-default-face))))
+         (cl-case type
+           ('default 'eshell-syntax-highlighting-default-face)
+           ('command 'eshell-syntax-highlighting-shell-command-face)
+           ('alias 'eshell-syntax-highlighting-alias-face)
+           ('lisp 'eshell-syntax-highlighting-lisp-function-face)
+           ('string 'eshell-syntax-highlighting-string-face)
+           ('invalid 'eshell-syntax-highlighting-invalid-face)
+           ('envvar 'eshell-syntax-highlighting-envvar-face)
+           ('directory 'eshell-syntax-highlighting-directory-face)
+           ('comment 'eshell-syntax-highlighting-comment-face)
+           (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
 (defun eshell-syntax-highlighting--parse-command (beg command)
