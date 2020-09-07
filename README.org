@@ -17,13 +17,13 @@ Then, in your ~init.el~:
 (add-to-list 'load-path "<path-to-eshell-syntax-highlighting-repository>")
 (require 'eshell-syntax-highlighting)
 ;; Use this to enable syntax highlighting by default
-(eshell-syntax-highlighting-enable)
+(eshell-syntax-highlighting-global-mode +1)
 
 ;; Alternatively, with use-package
 (use-package eshell-syntax-highlighting
   :after esh-mode
   :load-path "<path-to-eshell-syntax-highlighting-repository>"
-  :config (eshell-syntax-highlighting-enable))
+  :config (eshell-syntax-highlighting-global-mode +1))
 #+END_SRC
 
 ** Usage
