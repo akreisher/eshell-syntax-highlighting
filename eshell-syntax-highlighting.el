@@ -250,29 +250,28 @@
       (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
         (eshell-syntax-highlighting--parse-and-highlight 'command)))))
 
-;;;###autoload
-(defun eshell-syntax-highlighting-enable ()
-  "Enable highlighting of Eshell commands in future sessions."
-  (interactive)
-  (add-hook 'eshell-mode-hook
-            #'eshell-syntax-highlighting-mode))
-
-(defun eshell-syntax-highlighting-disable ()
-  "Disable highlighting of Eshell commands in future sessions."
-  (interactive)
-  (remove-hook 'eshell-mode-hook
-               #'eshell-syntax-highlighting-mode))
 
 ;;;###autoload
 (define-minor-mode eshell-syntax-highlighting-mode
   "Toggle syntax highlighting for Eshell."
   nil nil nil
   (if (and eshell-syntax-highlighting-mode
-            (eq major-mode 'eshell-mode))
+           (eq major-mode 'eshell-mode)
+           (not eshell-non-interactive-p))
       (add-hook 'post-command-hook
                 #'eshell-syntax-highlighting--enable-highlighting nil t)
     (remove-hook 'post-command-hook
                  #'eshell-syntax-highlighting--enable-highlighting t)))
+
+;;;###autoload
+(define-globalized-minor-mode eshell-syntax-highlighting-global-mode
+  eshell-syntax-highlighting-mode eshell-syntax-highlighting--global-on)
+
+(defun eshell-syntax-highlighting--global-on ()
+    "Enable eshell-syntax-highlighting olny in appropriate buffers."
+    (when (and (eq major-mode 'eshell-mode)
+               (not eshell-non-interactive-p))
+      (eshell-syntax-highlighting-mode +1)))
 
 (provide 'eshell-syntax-highlighting)
 ;;; eshell-syntax-highlighting.el ends here
