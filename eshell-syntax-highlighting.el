@@ -128,10 +128,22 @@
        'command))
     (eshell-syntax-highlighting--parse-and-highlight 'command))
 
-   ;; Forced external command
-   ((and (string-prefix-p "*" command)
+   ;; Executable file
+   ((and (string-match-p ".*/.+" command)
+         (file-regular-p command)
+         (file-executable-p command))
+        (eshell-syntax-highlighting--highlight beg (point) 'command)
+        (eshell-syntax-highlighting--parse-and-highlight 'argument))
+
+   ;; Explicit external command
+   ((and (char-equal eshell-explicit-command-char (aref command 0))
          (executable-find (substring command 1 nil)))
     (eshell-syntax-highlighting--highlight beg (point) 'command)
+    (eshell-syntax-highlighting--parse-and-highlight 'argument))
+
+   ;; Eshell alias
+   ((eshell-lookup-alias command)
+    (eshell-syntax-highlighting--highlight beg (point) 'alias)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Built-in
@@ -140,19 +152,14 @@
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Prioritized lisp function
-   ((and eshell-prefer-lisp-functions (functionp (intern command)))
+   ((and eshell-prefer-lisp-functions
+         (functionp (intern command)))
     (eshell-syntax-highlighting--highlight beg (point) 'lisp)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Executable
-   ((or (executable-find command)
-        (and (file-regular-p command) (file-executable-p command)))
+   ((executable-find command)
     (eshell-syntax-highlighting--highlight beg (point) 'command)
-    (eshell-syntax-highlighting--parse-and-highlight 'argument))
-
-   ;; Eshell aliases
-   ((eshell-lookup-alias command)
-    (eshell-syntax-highlighting--highlight beg (point) 'alias)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Lisp
@@ -171,7 +178,8 @@
     (eshell-syntax-highlighting--highlight beg (point-max) 'default))
 
    ;; Directory for cd
-   ((and eshell-cd-on-directory (file-directory-p command))
+   ((and eshell-cd-on-directory
+         (file-directory-p command))
     (eshell-syntax-highlighting--highlight beg (point) 'directory)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
