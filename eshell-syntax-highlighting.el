@@ -112,7 +112,7 @@
            ('envvar 'eshell-syntax-highlighting-envvar-face)
            ('directory 'eshell-syntax-highlighting-directory-face)
            ('comment 'eshell-syntax-highlighting-comment-face)
-		   ('file-arg 'eshell-syntax-highlighting-file-arg-face)
+           ('file-arg 'eshell-syntax-highlighting-file-arg-face)
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
@@ -199,8 +199,8 @@
 
   ;; Whitespace
   (when (re-search-forward "\\s-*" nil t)
-	(eshell-syntax-highlighting--highlight
-	 (match-beginning 0) (match-end 0) 'default))
+    (eshell-syntax-highlighting--highlight
+     (match-beginning 0) (match-end 0) 'default))
 
   (let ((beg (point)))
     (cond
@@ -246,9 +246,9 @@
        (t
         (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
         (eshell-syntax-highlighting--highlight
-		 beg (point) (cond
-					  ((file-exists-p (match-string 0)) 'file-arg)
-					  (t 'default)))
+         beg (point) (cond
+                      ((file-exists-p (match-string 0)) 'file-arg)
+                      (t 'default)))
         (eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
 
