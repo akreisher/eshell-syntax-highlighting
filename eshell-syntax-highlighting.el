@@ -91,7 +91,12 @@
 
 (defface eshell-syntax-highlighting-directory-face
          '((t :inherit font-lock-type-face))
-  "Face used for directory commands in an eshell command."
+  "Face used for directory cd commands in an eshell command."
+  :group 'eshell-syntax-highlighting)
+
+(defface eshell-syntax-highlighting-file-arg-face
+         '((t :underline t))
+  "Face used for command arguments which are existing files."
   :group 'eshell-syntax-highlighting)
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
@@ -107,6 +112,7 @@
            ('envvar 'eshell-syntax-highlighting-envvar-face)
            ('directory 'eshell-syntax-highlighting-directory-face)
            ('comment 'eshell-syntax-highlighting-comment-face)
+		   ('file-arg 'eshell-syntax-highlighting-file-arg-face)
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
@@ -191,8 +197,11 @@
 (defun eshell-syntax-highlighting--parse-and-highlight (expected)
   "Parse and highlight from point, expecting token of type EXPECTED."
 
-  ;; Skip whitespace
-  (re-search-forward "\\s-*" nil t)
+  ;; Whitespace
+  (when (re-search-forward "\\s-*" nil t)
+	(eshell-syntax-highlighting--highlight
+	 (match-beginning 0) (match-end 0) 'default))
+
   (let ((beg (point)))
     (cond
      ;; Exit at eol
@@ -236,7 +245,10 @@
        ;; Argument
        (t
         (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
-        (eshell-syntax-highlighting--highlight beg (point) 'default)
+        (eshell-syntax-highlighting--highlight
+		 beg (point) (cond
+					  ((file-exists-p (match-string 0)) 'file-arg)
+					  (t 'default)))
         (eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
 
