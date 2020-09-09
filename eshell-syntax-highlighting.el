@@ -1,4 +1,4 @@
-;;; eshell-syntax-highlighting.el --- Highlight eshell command  -*- lexical-binding:t -*-
+;;; eshell-syntax-highlighting.el --- Highlight eshell commands  -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2020 Alex Kreisher
 
@@ -27,7 +27,7 @@
 ;;
 ;; Provides syntax highlighting for Eshell.
 ;;
-;; Highlights commands as the user type to validate commands and syntax.
+;; Highlights commands as the user types to validate commands and syntax.
 ;;
 
 

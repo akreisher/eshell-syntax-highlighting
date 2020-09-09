@@ -1,5 +1,5 @@
 * =Eshell Syntax Highlighting=
-
+[[https://melpa.org/#/eshell-syntax-highlighting][file:https://melpa.org/packages/eshell-syntax-highlighting-badge.svg]]
 ** Introduction
 
 This package adds syntax highlighting to the Emacs [[https://www.gnu.org/software/emacs/manual/html_node/eshell/][Eshell]]. It highlights user commands at the interactive prompt to provide feedback on the validity of commands and syntax.
