@@ -246,9 +246,13 @@
        (t
         (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
         (eshell-syntax-highlighting--highlight
-         beg (point) (cond
-                      ((file-exists-p (match-string 0)) 'file-arg)
-                      (t 'default)))
+         beg (point)
+         (cond
+          (condition-case nil
+              (file-exists-p (match-string 0))
+            ('file-error nil)
+            (tramp-file-missing nil))) 'file-arg)
+        (t 'default)))
         (eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
 
