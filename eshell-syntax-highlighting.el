@@ -260,7 +260,8 @@
       (goto-char eshell-last-output-end)
       (forward-line 0)
       (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-        (eshell-syntax-highlighting--parse-and-highlight 'command)))))
+        (ignore-errors
+          (eshell-syntax-highlighting--parse-and-highlight 'command))))))
 
 
 ;;;###autoload
