@@ -126,17 +126,17 @@
                   nil (scan-sexps beg 1)
                 ('scan-error (point-max))))
          (str (buffer-substring-no-properties beg end)))
-	(if (not eshell-syntax-highlighting-highlight-elisp)
-		(eshell-syntax-highlighting--highlight beg (point) 'default)
+    (if (not eshell-syntax-highlighting-highlight-elisp)
+        (eshell-syntax-highlighting--highlight beg (point) 'default)
       (goto-char beg)
       (insert
        (with-temp-buffer
-		 (erase-buffer)
-		 (insert str)
-		 (delay-mode-hooks (emacs-lisp-mode))
-		 (font-lock-default-function 'emacs-lisp-mode)
-		 (font-lock-default-fontify-region (point-min) (point-max) nil)
-		 (buffer-string)))
+         (erase-buffer)
+         (insert str)
+         (delay-mode-hooks (emacs-lisp-mode))
+         (font-lock-default-function 'emacs-lisp-mode)
+         (font-lock-default-fontify-region (point-min) (point-max) nil)
+         (buffer-string)))
       (delete-region (point) (+ (point) (length str))))
     (goto-char end)))
 
@@ -286,7 +286,7 @@
         (forward-line 0)
         (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
           (ignore-errors
-			(eshell-syntax-highlighting--parse-and-highlight 'command))))
+            (eshell-syntax-highlighting--parse-and-highlight 'command))))
       ;; save-excursion marker is deleted when highlighting elisp,
       ;; so explicitly pop back to initial point.
       (goto-char beg))))
