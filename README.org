@@ -45,5 +45,4 @@ to customize the faces used by this package.
 ** Todo
 
 - [ ] Parse for loops
-- [ ] Fontify lisp with temp buffer
 - [ ] Parse variable/command substitutions
