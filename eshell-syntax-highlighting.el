@@ -247,9 +247,11 @@
      ;; Commands
      ((eq expected 'command)
       (cond
+       ;; Parenthesized Emacs Lisp
        ((looking-at-p "(")
         (eshell-syntax-highlighting--highlight-elisp beg)
         (eshell-syntax-highlighting--parse-and-highlight 'argument))
+       ;; Command string
        (t
         (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
         (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))))
