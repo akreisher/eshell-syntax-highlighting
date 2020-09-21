@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 Alex Kreisher
 
 ;; Author: Alex Kreisher <akreisher18@gmail.com>
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/akreisher/eshell-syntax-highlighting
@@ -46,52 +46,57 @@
 
 (defgroup eshell-syntax-highlighting nil
   "Faces used to highlight the syntax of Eshell commands."
-  :tag "Eshell Highlighting Faces"
-  :group 'faces)
+  :tag "Eshell Syntax Highlighting"
+  :group 'eshell)
+
+(defcustom eshell-syntax-highlighting-highlight-elisp t
+  "Whether to natively parse Emacs Lisp through a temporary buffer."
+  :type 'boolean
+  :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-default-face
          '((t :inherit default))
-  "Default face for eshell commands."
+  "Default face for Eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-envvar-face
          '((t :inherit font-lock-variable-name-face))
-  "Face used for environment variables in an eshell command."
+  "Face used for environment variables in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-comment-face
          '((t :inherit font-lock-comment-face))
-  "Face used for environment variables in an eshell command."
+  "Face used for environment variables in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
          '((t :inherit font-lock-string-face))
-  "Face used for environment variables in an eshell command."
+  "Face used for environment variables in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-shell-command-face
          '((t :inherit success))
-  "Face used for valid shell in an eshell command."
+  "Face used for valid shell in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-lisp-function-face
          '((t :inherit font-lock-function-name-face))
-  "Face used for elisp functions."
+  "Face used for Emacs Lisp functions."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-alias-face
          '((t :inherit eshell-syntax-highlighting-shell-command-face))
-  "Face used for eshell aliases."
+  "Face used for Eshell aliases."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-invalid-face
          '((t :inherit error))
-  "Face used for invalid eshell commands."
+  "Face used for invalid Eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-directory-face
          '((t :inherit font-lock-type-face))
-  "Face used for directory cd commands in an eshell command."
+  "Face used for directory cd commands in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-file-arg-face
@@ -115,6 +120,26 @@
            ('file-arg 'eshell-syntax-highlighting-file-arg-face)
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
+
+(defun eshell-syntax-highlighting--highlight-elisp (beg)
+  "Highlight Emacs Lisp starting at BEG natively through a temp buffer."
+  (let* ((end (condition-case
+                  nil (scan-sexps beg 1)
+                ('scan-error (point-max))))
+         (str (buffer-substring-no-properties beg end)))
+    (if (not eshell-syntax-highlighting-highlight-elisp)
+        (eshell-syntax-highlighting--highlight beg (point) 'default)
+      (goto-char beg)
+      (insert
+       (with-temp-buffer
+         (erase-buffer)
+         (insert str)
+         (delay-mode-hooks (emacs-lisp-mode))
+         (font-lock-default-function 'emacs-lisp-mode)
+         (font-lock-default-fontify-region (point-min) (point-max) nil)
+         (buffer-string)))
+      (delete-region (point) (+ (point) (length str))))
+    (goto-char end)))
 
 (defun eshell-syntax-highlighting--parse-command (beg command)
   "Parse COMMAND starting at BEG and dispatch to highlighting and continued parsing."
@@ -173,11 +198,6 @@
     (eshell-syntax-highlighting--highlight beg (point) 'lisp)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
-   ;; Parenthesized lisp
-   ;; Disable highlighting from here on out
-   ((string-prefix-p "(" command)
-    (eshell-syntax-highlighting--highlight beg (point-max) 'default))
-
    ;; For loop
    ;; Disable highlighting from here on out
    ((string-equal "for" command)
@@ -227,8 +247,15 @@
 
      ;; Commands
      ((eq expected 'command)
-      (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
-      (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))
+      (cond
+       ;; Parenthesized Emacs Lisp
+       ((looking-at-p "(")
+        (eshell-syntax-highlighting--highlight-elisp beg)
+        (eshell-syntax-highlighting--parse-and-highlight 'argument))
+       ;; Command string
+       (t
+        (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
+        (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))))
 
      (t
       (cond
@@ -253,15 +280,19 @@
 
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
-  "Parse and highlight the command at the last eshell prompt."
+  "Parse and highlight the command at the last Eshell prompt."
   (when (and (eq major-mode 'eshell-mode)
              (not eshell-non-interactive-p))
-    (save-excursion
-      (goto-char eshell-last-output-end)
-      (forward-line 0)
-      (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-        (ignore-errors
-          (eshell-syntax-highlighting--parse-and-highlight 'command))))))
+    (let ((beg (point)))
+      (save-excursion
+        (goto-char eshell-last-output-end)
+        (forward-line 0)
+        (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
+          (ignore-errors
+            (eshell-syntax-highlighting--parse-and-highlight 'command))))
+      ;; save-excursion marker is deleted when highlighting elisp,
+      ;; so explicitly pop back to initial point.
+      (goto-char beg))))
 
 
 ;;;###autoload
@@ -281,10 +312,10 @@
   eshell-syntax-highlighting-mode eshell-syntax-highlighting--global-on)
 
 (defun eshell-syntax-highlighting--global-on ()
-    "Enable eshell-syntax-highlighting olny in appropriate buffers."
-    (when (and (eq major-mode 'eshell-mode)
-               (not eshell-non-interactive-p))
-      (eshell-syntax-highlighting-mode +1)))
+  "Enable eshell-syntax-highlighting only in appropriate buffers."
+  (when (and (eq major-mode 'eshell-mode)
+             (not eshell-non-interactive-p))
+    (eshell-syntax-highlighting-mode +1)))
 
 (provide 'eshell-syntax-highlighting)
 ;;; eshell-syntax-highlighting.el ends here
