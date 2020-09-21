@@ -51,6 +51,7 @@
 
 (defcustom eshell-syntax-highlighting-highlight-elisp t
   "Whether to natively parse Emacs Lisp through a temporary buffer."
+  :type 'boolean
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-default-face
