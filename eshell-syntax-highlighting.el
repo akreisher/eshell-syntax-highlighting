@@ -66,12 +66,12 @@
 
 (defface eshell-syntax-highlighting-comment-face
          '((t :inherit font-lock-comment-face))
-  "Face used for environment variables in an Eshell command."
+  "Face used for comments in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
          '((t :inherit font-lock-string-face))
-  "Face used for environment variables in an Eshell command."
+  "Face used for quoted strings in Eshell arguments."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-shell-command-face
@@ -96,7 +96,7 @@
 
 (defface eshell-syntax-highlighting-directory-face
          '((t :inherit font-lock-type-face))
-  "Face used for directory cd commands in an Eshell command."
+  "Face used for directories in command position if ‘eshell-cd-on-directory’ is t"
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-file-arg-face
