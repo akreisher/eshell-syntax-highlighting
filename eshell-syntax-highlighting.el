@@ -106,6 +106,7 @@
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from BEG to END based on TYPE."
+  (set-text-properties beg end nil nil)
   (let ((face
          (cl-case type
            ('default 'eshell-syntax-highlighting-default-face)
