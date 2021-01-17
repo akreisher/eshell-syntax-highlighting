@@ -42,6 +42,7 @@
   (require 'em-prompt))
 
 (require 'esh-util)
+(require 'em-alias)
 
 
 (defgroup eshell-syntax-highlighting nil
