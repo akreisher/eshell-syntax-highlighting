@@ -105,6 +105,14 @@
   "Face used for command arguments which are existing files."
   :group 'eshell-syntax-highlighting)
 
+(defun eshell-syntax-highlighting--goto-string-end (delim)
+  "Find the end of a string delimited by DELIM."
+  (unless
+      (re-search-forward
+	   ;; Ignore escaped delimiters.
+       (concat "\\(\\`\\|[^\\\\]\\)" delim) nil t)
+          (goto-char (point-max))))
+
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from BEG to END based on TYPE."
   (set-text-properties beg end nil nil)
@@ -146,10 +154,6 @@
 (defun eshell-syntax-highlighting--parse-command (beg command)
   "Parse COMMAND starting at BEG and dispatch to highlighting and continued parsing."
   (cond
-   ;; Environment variabale
-   ((string-match "[a-zA-Z0-9_]+=.*" command)
-    (eshell-syntax-highlighting--highlight beg (point) 'envvar)
-    (eshell-syntax-highlighting--parse-and-highlight 'command))
 
    ;; Sudo
    ((string-match "^\\(\\*\\|eshell/\\)?sudo$" command)
@@ -254,9 +258,19 @@
        ((looking-at-p "(")
         (eshell-syntax-highlighting--highlight-elisp beg)
         (eshell-syntax-highlighting--parse-and-highlight 'argument))
+
+	   ;; Environment variabale
+	   ((looking-at "[a-zA-Z0-9_]+=")
+		(goto-char (match-end 0))
+		(if (looking-at "[\"']")
+			(eshell-syntax-highlighting--goto-string-end (match-string 0))
+		  (re-search-forward "[^[:space:]&|;]*" (line-end-position)))
+		(eshell-syntax-highlighting--highlight beg (point) 'envvar)
+		(eshell-syntax-highlighting--parse-and-highlight 'command))
+
        ;; Command string
        (t
-        (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
+        (re-search-forward "[^[:space:]&|;]*" (line-end-position))
         (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))))
 
      (t
@@ -264,10 +278,7 @@
 
        ;; Quoted string
        ((looking-at "[\"']")
-        (unless
-            (re-search-forward
-             (concat "\\(\\`\\|[^\\\\]\\)" (match-string 0)) nil t)
-          (goto-char (point-max)))
+		(eshell-syntax-highlighting--goto-string-end (match-string 0))
         (eshell-syntax-highlighting--highlight beg (point) 'string)
         (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
