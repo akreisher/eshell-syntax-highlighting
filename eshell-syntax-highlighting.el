@@ -155,8 +155,8 @@
   "Parse COMMAND starting at BEG and dispatch to highlighting and continued parsing."
   (cond
 
-   ;; Sudo
-   ((string-match "^\\(\\*\\|eshell/\\)?sudo$" command)
+   ;; Command wrappers (sudo, time)
+   ((string-match "^\\(\\*\\|eshell/\\)?\\(sudo\\|time\\)$" command)
     (eshell-syntax-highlighting--highlight
      beg (point)
      (if (and (match-string 1 command)
