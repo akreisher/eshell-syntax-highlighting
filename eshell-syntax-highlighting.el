@@ -295,7 +295,8 @@
 (defun eshell-syntax-highlighting--enable-highlighting ()
   "Parse and highlight the command at the last Eshell prompt."
   (when (and (eq major-mode 'eshell-mode)
-             (not eshell-non-interactive-p))
+             (not eshell-non-interactive-p)
+			 (not mark-active))
     (let ((beg (point))
           (non-essential t))
       (save-excursion
