@@ -313,7 +313,8 @@
 ;;;###autoload
 (define-minor-mode eshell-syntax-highlighting-mode
   "Toggle syntax highlighting for Eshell."
-  nil nil nil
+  :lighter nil
+  :keymap nil
   (if (and eshell-syntax-highlighting-mode
            (eq major-mode 'eshell-mode)
            (not eshell-non-interactive-p))
