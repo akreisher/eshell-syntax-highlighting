@@ -21,8 +21,8 @@ Alternatively, with [[https://github.com/jwiegley/use-package][use-package]]:
 
 #+BEGIN_SRC emacs-lisp
 (use-package eshell-syntax-highlighting
-  :after esh-mode
-  :demand t ;; Install if not already installed.
+  :after eshell-mode
+  :ensure t ;; Install if not already installed.
   :config
   ;; Enable in all Eshell buffers.
   (eshell-syntax-highlighting-global-mode +1))
