@@ -299,12 +299,13 @@
              (not mark-active))
     (let ((beg (point))
           (non-essential t))
-      (save-excursion
-        (goto-char eshell-last-output-end)
-        (forward-line 0)
-        (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-          (ignore-errors
-            (eshell-syntax-highlighting--parse-and-highlight 'command))))
+      (with-silent-modifications
+        (save-excursion
+          (goto-char eshell-last-output-end)
+          (forward-line 0)
+          (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
+            (ignore-errors
+              (eshell-syntax-highlighting--parse-and-highlight 'command)))))
       ;; save-excursion marker is deleted when highlighting elisp,
       ;; so explicitly pop back to initial point.
       (goto-char beg))))
