@@ -55,6 +55,13 @@
   :type 'boolean
   :group 'eshell-syntax-highlighting)
 
+
+(defcustom eshell-syntax-highlighting-highlight-in-remote-dirs nil
+  "Whether to perform syntax highlighting in remote directories."
+  :type 'boolean
+  :group 'eshell-syntax-highlighting)
+
+
 (defface eshell-syntax-highlighting-default-face
          '((t :inherit default))
   "Default face for Eshell commands."
@@ -104,6 +111,14 @@
          '((t :underline t))
   "Face used for command arguments which are existing files."
   :group 'eshell-syntax-highlighting)
+
+
+(defun eshell-syntax-highlighting--executable-find (command)
+  "Check if COMMAND is on the exec-path."
+  (if (< emacs-major-version 27)
+      (executable-find command)
+    (executable-find command t)))
+
 
 (defun eshell-syntax-highlighting--goto-string-end (delim)
   "Find the end of a string delimited by DELIM."
@@ -174,7 +189,7 @@
 
    ;; Explicit external command
    ((and (char-equal eshell-explicit-command-char (aref command 0))
-         (executable-find (substring command 1 nil)))
+         (eshell-syntax-highlighting--executable-find (substring command 1 nil)))
     (eshell-syntax-highlighting--highlight beg (point) 'command)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
@@ -195,7 +210,7 @@
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
    ;; Executable
-   ((executable-find command)
+   ((eshell-syntax-highlighting--executable-find command)
     (eshell-syntax-highlighting--highlight beg (point) 'command)
     (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
@@ -294,11 +309,14 @@
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
   "Parse and highlight the command at the last Eshell prompt."
-  (when (and (eq major-mode 'eshell-mode)
-             (not eshell-non-interactive-p)
-             (not mark-active))
-    (let ((beg (point))
-          (non-essential t))
+  (let ((beg (point))
+        (non-essential t))
+    (when (and (eq major-mode 'eshell-mode)
+               (not eshell-non-interactive-p)
+               (not mark-active)
+               (or
+                eshell-syntax-highlighting-highlight-in-remote-dirs
+                (not (file-remote-p default-directory))))
       (with-silent-modifications
         (save-excursion
           (goto-char eshell-last-output-end)

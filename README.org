@@ -34,6 +34,10 @@ Use ~(eshell-syntax-highlighting-global-mode)~ to toggle highlighting in all fut
 
 You can toggle highlighting in an existing buffer with ~(eshell-syntax-highlighting-mode)~.
 
+** Remote Directories
+
+Since elisp in remote directories will run locally, high-latency [[https://www.gnu.org/software/tramp/][TRAMP]] connections can cause significant typing delays while the local Emacs session makes requests of the remote machine (such as searching the remote PATH, checking if remote files exist, etc.). Therefore, highlighting in remote directories is disabled by default. It can be enabled by setting ~eshell-syntax-highlighting-highlight-in-remote-dirs~ to ~t~.
+
 ** Customization
 
 Faces in this package inherit from standard faces to match your theming. If this results in ambiguous highlighting (e.g. your ~font-lock-function-name-face~ is red), or if you just want to customize the coloring, you can use
