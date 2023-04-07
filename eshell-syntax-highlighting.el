@@ -77,6 +77,16 @@
   "Face used for comments in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
+(defface eshell-syntax-highlighting-delimiter-face
+         '((t :inherit default))
+  "Face used for delimiters in an Eshell command."
+  :group 'eshell-syntax-highlighting)
+
+(defface eshell-syntax-highlighting-argument-face
+         '((t :inherit font-lock-constant-face))
+  "Face used for arguments in an Eshell command."
+  :group 'eshell-syntax-highlighting)
+
 (defface eshell-syntax-highlighting-string-face
          '((t :inherit font-lock-string-face))
   "Face used for quoted strings in Eshell arguments."
@@ -113,12 +123,13 @@
   :group 'eshell-syntax-highlighting)
 
 
+(defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;]*")
+
 (defun eshell-syntax-highlighting--executable-find (command)
   "Check if COMMAND is on the exec-path."
   (if (< emacs-major-version 27)
       (executable-find command)
     (executable-find command t)))
-
 
 (defun eshell-syntax-highlighting--goto-string-end (delim)
   "Find the end of a string delimited by DELIM."
@@ -142,6 +153,8 @@
            (envvar 'eshell-syntax-highlighting-envvar-face)
            (directory 'eshell-syntax-highlighting-directory-face)
            (comment 'eshell-syntax-highlighting-comment-face)
+           (delimiter 'eshell-syntax-highlighting-delimiter-face)
+           (argument 'eshell-syntax-highlighting-argument-face)
            (file-arg 'eshell-syntax-highlighting-file-arg-face)
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
@@ -252,6 +265,12 @@
      ((looking-at "#")
       (eshell-syntax-highlighting--highlight beg (point-max) 'comment))
 
+     ;; Arguments
+     ((looking-at "-")
+      (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
+      (eshell-syntax-highlighting--highlight beg (point) 'argument)
+      (eshell-syntax-highlighting--parse-and-highlight expected))
+
      ;; Line-wrapping backslash
      ((looking-at "\\\\\n")
       (goto-char (match-end 0))
@@ -263,7 +282,7 @@
       (goto-char (match-end 0))
       (if (eq 'expected 'command)
           (eshell-syntax-highlighting--highlight beg (point) 'invalid)
-        (eshell-syntax-highlighting--highlight beg (point) 'default))
+        (eshell-syntax-highlighting--highlight beg (point) 'delimiter))
       (eshell-syntax-highlighting--parse-and-highlight 'command))
 
      ;; Commands
@@ -274,18 +293,18 @@
         (eshell-syntax-highlighting--highlight-elisp beg)
         (eshell-syntax-highlighting--parse-and-highlight 'argument))
 
-	   ;; Environment variabale
+	   ;; Environment variable
 	   ((looking-at "[a-zA-Z0-9_]+=")
 		(goto-char (match-end 0))
 		(if (looking-at "[\"']")
 			(eshell-syntax-highlighting--goto-string-end (match-string 0))
-		  (re-search-forward "[^[:space:]&|;]*" (line-end-position)))
+		  (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (line-end-position)))
 		(eshell-syntax-highlighting--highlight beg (point) 'envvar)
 		(eshell-syntax-highlighting--parse-and-highlight 'command))
 
        ;; Command string
        (t
-        (re-search-forward "[^[:space:]&|;]*" (line-end-position))
+        (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
         (eshell-syntax-highlighting--parse-command beg (match-string-no-properties 0)))))
 
      (t
@@ -299,7 +318,7 @@
 
        ;; Argument
        (t
-        (search-forward-regexp "[^[:space:]&|;]*" (line-end-position))
+        (search-forward-regexp eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
         (eshell-syntax-highlighting--highlight
          beg (point) (cond
                       ((file-exists-p (match-string 0)) 'file-arg)
