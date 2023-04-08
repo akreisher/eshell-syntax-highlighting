@@ -179,6 +179,15 @@
       (delete-region (point) (+ (point) (length str))))
     (goto-char end)))
 
+(defun eshell-syntax-highlighting--highlight-filename (beg)
+  "Highlight argument file starting at BEG."
+  (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
+  (eshell-syntax-highlighting--highlight
+   beg (point)
+   (cond
+    ((file-exists-p (match-string 0)) 'file-arg)
+    (t 'default))))
+
 (defun eshell-syntax-highlighting--parse-command (beg command)
   "Parse COMMAND starting at BEG and highlight."
   (cond
@@ -261,11 +270,22 @@
      ;; Exit at eol
      ((eolp) nil)
 
+     ;; Redirection
+     ((and (looking-at ">") (eq expected 'argument))
+      (re-search-forward ">+\\s-*")
+      (if (not (looking-at "#<"))
+          ;; Redirect to normal file.
+          (eshell-syntax-highlighting--highlight-filename (point))
+        ;; Redirection to buffer #<buffer-name>.
+        (eshell-syntax-highlighting--goto-string-end ">")
+        (eshell-syntax-highlighting--highlight beg (point) 'default))
+      (eshell-syntax-highlighting--parse-and-highlight 'argument))
+
      ;; Comments
      ((looking-at "#")
       (eshell-syntax-highlighting--highlight beg (point-max) 'comment))
 
-     ;; Arguments
+     ;; Options
      ((looking-at "-")
       (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
       (eshell-syntax-highlighting--highlight beg (point) 'argument)
@@ -318,11 +338,7 @@
 
        ;; Argument
        (t
-        (search-forward-regexp eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
-        (eshell-syntax-highlighting--highlight
-         beg (point) (cond
-                      ((file-exists-p (match-string 0)) 'file-arg)
-                      (t 'default)))
+        (eshell-syntax-highlighting--highlight-filename beg)
         (eshell-syntax-highlighting--parse-and-highlight 'argument)))))))
 
 
