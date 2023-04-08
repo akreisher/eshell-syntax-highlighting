@@ -278,9 +278,9 @@
       (eshell-syntax-highlighting--parse-and-highlight expected))
 
      ;; Delimiters
-     ((looking-at "[&|;]")
+     ((looking-at "|+\\|&+\\|;")
       (goto-char (match-end 0))
-      (if (eq 'expected 'command)
+      (if (eq expected 'command)
           (eshell-syntax-highlighting--highlight beg (point) 'invalid)
         (eshell-syntax-highlighting--highlight beg (point) 'delimiter))
       (eshell-syntax-highlighting--parse-and-highlight 'command))
