@@ -114,7 +114,7 @@
 
 (defface eshell-syntax-highlighting-directory-face
          '((t :inherit font-lock-type-face))
-  "Face used for directories in command position if ‘eshell-cd-on-directory’ is t"
+  "Face used for directories in command position if ‘eshell-cd-on-directory’ is t."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-file-arg-face
@@ -126,7 +126,7 @@
 (defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;]*")
 
 (defun eshell-syntax-highlighting--executable-find (command)
-  "Check if COMMAND is on the exec-path."
+  "Check if COMMAND is on the variable `exec-path'."
   (if (< emacs-major-version 27)
       (executable-find command)
     (executable-find command t)))
@@ -163,7 +163,7 @@
   "Highlight Emacs Lisp starting at BEG natively through a temp buffer."
   (let* ((end (condition-case
                   nil (scan-sexps beg 1)
-                ('scan-error (point-max))))
+                (scan-error (point-max))))
          (str (buffer-substring-no-properties beg end)))
     (if (not eshell-syntax-highlighting-highlight-elisp)
         (eshell-syntax-highlighting--highlight beg (point) 'default)
@@ -180,7 +180,7 @@
     (goto-char end)))
 
 (defun eshell-syntax-highlighting--parse-command (beg command)
-  "Parse COMMAND starting at BEG and dispatch to highlighting and continued parsing."
+  "Parse COMMAND starting at BEG and highlight."
   (cond
 
    ;; Command wrappers (sudo, time)
