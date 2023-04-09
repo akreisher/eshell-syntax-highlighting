@@ -82,9 +82,9 @@
   "Face used for delimiters in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
-(defface eshell-syntax-highlighting-argument-face
+(defface eshell-syntax-highlighting-option-face
          '((t :inherit font-lock-constant-face))
-  "Face used for arguments in an Eshell command."
+  "Face used for options in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
@@ -154,7 +154,7 @@
            (directory 'eshell-syntax-highlighting-directory-face)
            (comment 'eshell-syntax-highlighting-comment-face)
            (delimiter 'eshell-syntax-highlighting-delimiter-face)
-           (argument 'eshell-syntax-highlighting-argument-face)
+           (option 'eshell-syntax-highlighting-option-face)
            (file-arg 'eshell-syntax-highlighting-file-arg-face)
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
@@ -288,7 +288,7 @@
      ;; Options
      ((looking-at "-")
       (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (line-end-position))
-      (eshell-syntax-highlighting--highlight beg (point) 'argument)
+      (eshell-syntax-highlighting--highlight beg (point) 'option)
       (eshell-syntax-highlighting--parse-and-highlight expected))
 
      ;; Line-wrapping backslash
