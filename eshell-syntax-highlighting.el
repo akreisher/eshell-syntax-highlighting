@@ -122,6 +122,12 @@
   "Face used for command arguments which are existing files."
   :group 'eshell-syntax-highlighting)
 
+(defface eshell-syntax-highlighting-command-substitution-face
+         '((t :inherit font-lock-escape-face))
+  "Face for $ command substitution delimiters."
+  :group 'eshell-syntax-highlighting)
+
+
 
 (defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;]*")
 
@@ -158,6 +164,7 @@
            (delimiter 'eshell-syntax-highlighting-delimiter-face)
            (option 'eshell-syntax-highlighting-option-face)
            (file-arg 'eshell-syntax-highlighting-file-arg-face)
+           (substitution 'eshell-syntax-highlighting-command-substitution-face)
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
@@ -197,13 +204,14 @@
                                     (forward-char))
                                   (point))))
             (goto-char subs-start)
-            (eshell-syntax-highlighting--highlight (- subs-start 2) (point) 'default)
+            (eshell-syntax-highlighting--highlight (- subs-start 2) (point) 'substitution)
             (eshell-syntax-highlighting--parse-and-highlight 'command subs-end)
             (when (looking-at match-symbol)
               (forward-char)
-              (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'default))))
+              (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution))))
          ((looking-at "(")
           ;; Elisp substitution
+          (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
           (eshell-syntax-highlighting--highlight-elisp (point) end))
          (t
           ;; Variable substitution
@@ -211,7 +219,7 @@
             (re-search-forward "[^[:space:]\\[&|;]*" end t)
             ;; Handle variable indexing
             (if (looking-at "\\[") (eshell-syntax-highlighting--find-unescaped "]" end))
-            (eshell-syntax-highlighting--highlight start (point) 'default)))))
+            (eshell-syntax-highlighting--highlight start (point) 'envvar)))))
     (goto-char curr-point)))
 
 
