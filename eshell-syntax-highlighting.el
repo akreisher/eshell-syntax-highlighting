@@ -391,6 +391,7 @@
        ;; Argument
        (t
         (eshell-syntax-highlighting--highlight-filename beg end)
+        (eshell-syntax-highlighting--highlight-substitutions beg end)
         (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))))
 
 
