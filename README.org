@@ -49,4 +49,3 @@ to customize the faces used by this package.
 ** Todo
 
 - [ ] Parse for loops
-- [ ] Parse variable/command substitutions
