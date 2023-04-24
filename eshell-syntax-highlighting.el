@@ -189,7 +189,6 @@
         (cond
          ((looking-at "{\\|<")
           ;; Command substitution
-          (pprint "here")
           (let* ((match-symbol (if (string-equal (match-string-no-properties 0) "{") "}" ">"))
                  (subs-start (+ (point) 1))
                  (subs-end (progn (eshell-syntax-highlighting--find-unescaped match-symbol end)
