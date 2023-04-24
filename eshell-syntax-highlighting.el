@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020-2023 Alex Kreisher
 
 ;; Author: Alex Kreisher <akreisher18@gmail.com>
-;; Version: 0.4
+;; Version: 0.5
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/akreisher/eshell-syntax-highlighting
@@ -128,7 +128,6 @@
   :group 'eshell-syntax-highlighting)
 
 
-
 (defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;]*")
 
 (defun eshell-syntax-highlighting--executable-find (command)
@@ -138,6 +137,7 @@
     (executable-find command t)))
 
 (defun eshell-syntax-highlighting--find-unescaped (seq end)
+  "Find first unescaped instance of SEQ before END."
   (if (looking-at (rx (* "\\\\") (regexp seq)))
       (when (<= (match-end 0) end)
         (goto-char (match-end 0))
