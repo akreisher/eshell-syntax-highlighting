@@ -138,14 +138,13 @@
 
 (defun eshell-syntax-highlighting--find-unescaped (seq end)
   "Find first unescaped instance of SEQ before END."
-  (if (looking-at (rx (* "\\\\") (regexp seq)))
+  (if (looking-at (concat "\\(?:\\\\\\\\\\)*" seq))
       (when (<= (match-end 0) end)
         (goto-char (match-end 0))
         (point))
-    (re-search-forward (rx (| (: (not "\\") (+ "\\\\"))
-                              (not "\\"))
-                           (regexp seq))
-                       end end)))
+    (re-search-forward
+     (concat "\\(\\([^\\\\]\\(\\\\\\\\\\)+\\|[^\\\\]\\)\\)" seq)
+     end end)))
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from BEG to END based on TYPE."
