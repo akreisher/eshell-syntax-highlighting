@@ -363,13 +363,14 @@
         (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
 	   ;; Environment variable
-	   ((re-search-forward "[a-zA-Z0-9_]+=" end t)
+	   ((looking-at "[[:alpha:]_][[:alnum:]_]*=")
+        (goto-char (min end (match-end 0)))
 		(if (looking-at "[\"']")
-            (when (<= (point) end) (forward-char))
-			(eshell-syntax-highlighting--find-unescaped (match-string 0) end)
+            (progn (when (< (point) end) (forward-char))
+		           (eshell-syntax-highlighting--find-unescaped (match-string 0) end))
 		  (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position))))
 		(eshell-syntax-highlighting--highlight beg (point) 'envvar)
-        (eshell-syntax-highlighting--highlight-substitutions beg end)
+        (eshell-syntax-highlighting--highlight-substitutions beg (point))
 		(eshell-syntax-highlighting--parse-and-highlight 'command end))
 
        ;; Command string
@@ -384,13 +385,13 @@
         (when (<= (point) end) (forward-char))
 		(eshell-syntax-highlighting--find-unescaped (match-string 0) end)
         (eshell-syntax-highlighting--highlight beg (point) 'string)
-        (eshell-syntax-highlighting--highlight-substitutions beg end)
+        (eshell-syntax-highlighting--highlight-substitutions beg (point))
         (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
        ;; Argument
        (t
         (eshell-syntax-highlighting--highlight-filename beg end)
-        (eshell-syntax-highlighting--highlight-substitutions beg end)
+        (eshell-syntax-highlighting--highlight-substitutions beg (point))
         (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))))
 
 
@@ -409,8 +410,7 @@
           (goto-char eshell-last-output-end)
           (forward-line 0)
           (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-            (ignore-errors
-              (eshell-syntax-highlighting--parse-and-highlight 'command (point-max))))))
+            (eshell-syntax-highlighting--parse-and-highlight 'command (point-max)))))
       ;; save-excursion marker is deleted when highlighting elisp,
       ;; so explicitly pop back to initial point.
       (goto-char beg))))
