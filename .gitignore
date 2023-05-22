@@ -1,1 +1,4 @@
 *.elc
+*-autoloads.el
+*#
+*~
