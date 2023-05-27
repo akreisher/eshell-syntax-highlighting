@@ -196,6 +196,7 @@
        ((looking-at "{\\|<" t)
         ;; Command substitution
         (let* ((match-symbol (if (eq ?{ (char-after)) "}" ">"))
+               (start (match-beginning 1))
                (subs-start (+ (point) 1))
                (subs-end (progn (eshell-syntax-highlighting--find-unescaped match-symbol end)
                                 (backward-char)
@@ -203,7 +204,7 @@
                                   (forward-char))
                                 (point))))
           (goto-char subs-start)
-          (eshell-syntax-highlighting--highlight (match-beginning 1) (point) 'substitution)
+          (eshell-syntax-highlighting--highlight start (point) 'substitution)
           (eshell-syntax-highlighting--parse-and-highlight 'command subs-end)
           (when (looking-at match-symbol)
             (forward-char)
@@ -302,7 +303,7 @@
           (t
            (eshell-syntax-highlighting--highlight beg (point) 'invalid)
            'argument))))
-    (eshell-syntax-highlighting--highlight-substitutions beg end)
+    (eshell-syntax-highlighting--highlight-substitutions beg (point))
     (eshell-syntax-highlighting--parse-and-highlight next-expected end)))
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected end)
@@ -392,6 +393,9 @@
        ;; Argument
        (t
         (eshell-syntax-highlighting--highlight-filename beg end)
+        ;; TODO: Handle this better.
+        ;; Right now, this will only highlight the command, and any args are
+        ;; handled outside the substitution, leading to un-highlighted end delim.
         (eshell-syntax-highlighting--highlight-substitutions beg (point))
         (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))))
 
