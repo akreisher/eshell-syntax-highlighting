@@ -143,7 +143,7 @@
         (goto-char (match-end 0))
         (point))
     (re-search-forward
-     (concat "\\(\\([^\\\\]\\(\\\\\\\\\\)+\\|[^\\\\]\\)\\)" seq)
+     (concat "\\(?:\\(?:[^\\\\]\\(?:\\\\\\\\\\)+\\|[^\\\\]\\)\\)" seq)
      end end)))
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
@@ -191,11 +191,11 @@
   "Find and highlight command substitutions in region (BEG, END)."
   (let ((curr-point (point)))
     (goto-char beg)
-    (while (and (eshell-syntax-highlighting--find-unescaped "\\$" end) (< (point) end))
+    (while (and (eshell-syntax-highlighting--find-unescaped "\\(\\$@?\\)" end) (< (point) end))
       (cond
-       ((looking-at "{\\|<")
+       ((looking-at "{\\|<" t)
         ;; Command substitution
-        (let* ((match-symbol (if (string-equal (match-string-no-properties 0) "{") "}" ">"))
+        (let* ((match-symbol (if (eq ?{ (char-after)) "}" ">"))
                (subs-start (+ (point) 1))
                (subs-end (progn (eshell-syntax-highlighting--find-unescaped match-symbol end)
                                 (backward-char)
@@ -203,22 +203,23 @@
                                   (forward-char))
                                 (point))))
           (goto-char subs-start)
-          (eshell-syntax-highlighting--highlight (- subs-start 2) (point) 'substitution)
+          (eshell-syntax-highlighting--highlight (match-beginning 1) (point) 'substitution)
           (eshell-syntax-highlighting--parse-and-highlight 'command subs-end)
           (when (looking-at match-symbol)
             (forward-char)
             (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution))))
-       ((looking-at "(")
+       ((looking-at "(" t)
         ;; Elisp substitution
-        (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+        (eshell-syntax-highlighting--highlight (match-beginning 1) (point) 'substitution)
         (eshell-syntax-highlighting--highlight-elisp (point) end))
        (t
         ;; Variable substitution
-        (let ((start (- (point) 1)))
-          (re-search-forward "[^[:space:]\\[&|;]*" end t)
-          ;; Handle variable indexing
-          (if (looking-at "\\[") (eshell-syntax-highlighting--find-unescaped "]" end))
-          (eshell-syntax-highlighting--highlight start (point) 'envvar)))))
+        (let ((start (match-beginning 1)))
+          (when (looking-at "\\([0-9*$]\\|[[:alpha:]][[:alnum:]-_]*\\)")
+            (goto-char (min (match-end 0) end))
+            ;; Handle variable indexing
+            (if (looking-at "\\[") (eshell-syntax-highlighting--find-unescaped "]" end))
+            (eshell-syntax-highlighting--highlight start (point) 'envvar))))))
     (goto-char curr-point)))
 
 
