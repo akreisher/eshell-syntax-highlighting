@@ -63,67 +63,67 @@
 
 
 (defface eshell-syntax-highlighting-default-face
-         '((t :inherit default))
+  '((t :inherit default))
   "Default face for Eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-envvar-face
-         '((t :inherit font-lock-variable-name-face))
+  '((t :inherit font-lock-variable-name-face))
   "Face used for environment variables in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-comment-face
-         '((t :inherit font-lock-comment-face))
+  '((t :inherit font-lock-comment-face))
   "Face used for comments in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-delimiter-face
-         '((t :inherit default))
+  '((t :inherit default))
   "Face used for delimiters in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-option-face
-         '((t :inherit font-lock-constant-face))
+  '((t :inherit font-lock-constant-face))
   "Face used for options in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-string-face
-         '((t :inherit font-lock-string-face))
+  '((t :inherit font-lock-string-face))
   "Face used for quoted strings in Eshell arguments."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-shell-command-face
-         '((t :inherit success))
+  '((t :inherit success))
   "Face used for valid shell in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-lisp-function-face
-         '((t :inherit font-lock-function-name-face))
+  '((t :inherit font-lock-function-name-face))
   "Face used for Emacs Lisp functions."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-alias-face
-         '((t :inherit eshell-syntax-highlighting-shell-command-face))
+  '((t :inherit eshell-syntax-highlighting-shell-command-face))
   "Face used for Eshell aliases."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-invalid-face
-         '((t :inherit error))
+  '((t :inherit error))
   "Face used for invalid Eshell commands."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-directory-face
-         '((t :inherit font-lock-type-face))
+  '((t :inherit font-lock-type-face))
   "Face used for directories in command position if ‘eshell-cd-on-directory’ is t."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-file-arg-face
-         '((t :underline t))
+  '((t :underline t))
   "Face used for command arguments which are existing files."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-command-substitution-face
-         '((t :inherit font-lock-escape-face))
+  '((t :inherit font-lock-escape-face))
   "Face for $ command substitution delimiters."
   :group 'eshell-syntax-highlighting)
 
@@ -170,8 +170,8 @@
 (defun eshell-syntax-highlighting--highlight-elisp (beg end)
   "Highlight Emacs Lisp in region (BEG, END) natively through a temp buffer."
   (let* ((elisp-end (condition-case
-                  nil (scan-sexps beg 1)
-                (scan-error end)))
+                        nil (scan-sexps beg 1)
+                      (scan-error end)))
          (str (buffer-substring-no-properties beg elisp-end)))
     (if (not eshell-syntax-highlighting-highlight-elisp)
         (eshell-syntax-highlighting--highlight beg (point) 'default)
@@ -192,33 +192,33 @@
   (let ((curr-point (point)))
     (goto-char beg)
     (while (and (eshell-syntax-highlighting--find-unescaped "\\$" end) (< (point) end))
-        (cond
-         ((looking-at "{\\|<")
-          ;; Command substitution
-          (let* ((match-symbol (if (string-equal (match-string-no-properties 0) "{") "}" ">"))
-                 (subs-start (+ (point) 1))
-                 (subs-end (progn (eshell-syntax-highlighting--find-unescaped match-symbol end)
-                                  (backward-char)
-                                  (when (not (looking-at match-symbol))
-                                    (forward-char))
-                                  (point))))
-            (goto-char subs-start)
-            (eshell-syntax-highlighting--highlight (- subs-start 2) (point) 'substitution)
-            (eshell-syntax-highlighting--parse-and-highlight 'command subs-end)
-            (when (looking-at match-symbol)
-              (forward-char)
-              (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution))))
-         ((looking-at "(")
-          ;; Elisp substitution
-          (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
-          (eshell-syntax-highlighting--highlight-elisp (point) end))
-         (t
-          ;; Variable substitution
-          (let ((start (- (point) 1)))
-            (re-search-forward "[^[:space:]\\[&|;]*" end t)
-            ;; Handle variable indexing
-            (if (looking-at "\\[") (eshell-syntax-highlighting--find-unescaped "]" end))
-            (eshell-syntax-highlighting--highlight start (point) 'envvar)))))
+      (cond
+       ((looking-at "{\\|<")
+        ;; Command substitution
+        (let* ((match-symbol (if (string-equal (match-string-no-properties 0) "{") "}" ">"))
+               (subs-start (+ (point) 1))
+               (subs-end (progn (eshell-syntax-highlighting--find-unescaped match-symbol end)
+                                (backward-char)
+                                (when (not (looking-at match-symbol))
+                                  (forward-char))
+                                (point))))
+          (goto-char subs-start)
+          (eshell-syntax-highlighting--highlight (- subs-start 2) (point) 'substitution)
+          (eshell-syntax-highlighting--parse-and-highlight 'command subs-end)
+          (when (looking-at match-symbol)
+            (forward-char)
+            (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution))))
+       ((looking-at "(")
+        ;; Elisp substitution
+        (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+        (eshell-syntax-highlighting--highlight-elisp (point) end))
+       (t
+        ;; Variable substitution
+        (let ((start (- (point) 1)))
+          (re-search-forward "[^[:space:]\\[&|;]*" end t)
+          ;; Handle variable indexing
+          (if (looking-at "\\[") (eshell-syntax-highlighting--find-unescaped "]" end))
+          (eshell-syntax-highlighting--highlight start (point) 'envvar)))))
     (goto-char curr-point)))
 
 
@@ -362,7 +362,7 @@
         (eshell-syntax-highlighting--highlight-elisp beg end)
         (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
-	   ;; Environment variable
+	   ;; Environment variable definition
 	   ((looking-at "[[:alpha:]_][[:alnum:]_]*=")
         (goto-char (min end (match-end 0)))
 		(if (looking-at "[\"']")
