@@ -384,10 +384,12 @@
       (cond
        ;; Quoted string
        ((looking-at "[\"']")
-        (when (<= (point) end) (forward-char))
-		(eshell-syntax-highlighting--find-unescaped (match-string 0) end)
-        (eshell-syntax-highlighting--highlight beg (point) 'string)
-        (eshell-syntax-highlighting--highlight-substitutions beg (point))
+        (let ((string-quote (match-string 0)))
+          (when (<= (point) end) (forward-char))
+		  (eshell-syntax-highlighting--find-unescaped string-quote end)
+          (eshell-syntax-highlighting--highlight beg (point) 'string)
+          (unless (string= string-quote "'")
+            (eshell-syntax-highlighting--highlight-substitutions beg (point))))
         (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
        ;; Argument
