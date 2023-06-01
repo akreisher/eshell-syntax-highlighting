@@ -331,7 +331,7 @@
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Comments
-     ((looking-at "#")
+     ((looking-at "#\\(?:[^<]\\|\\'\\)")
       (eshell-syntax-highlighting--highlight beg end 'comment))
 
      ;; Options
