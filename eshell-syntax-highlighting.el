@@ -169,9 +169,6 @@
 
 (defvar eshell-syntax-highlighting--indirect-lisp-buffer nil)
 
-(defvar eshell-syntax-highlighting-indirect-buffer-setup-hook nil
-  "Hook run to setup the in-direct buffer used for syntax highlighting Elisp.")
-
 (defun eshell-syntax-highlighting--indirect-buffer ()
   "Return the indirect buffer for syntax highlighting."
   (if (buffer-live-p eshell-syntax-highlighting--indirect-lisp-buffer)
@@ -187,8 +184,7 @@
             (after-change-major-mode-hook nil))
         (emacs-lisp-mode))
       (setq-local font-lock-dont-widen t)
-      (setq-local font-lock-support-mode nil)
-      (run-hooks 'eshell-syntax-highlighting-indirect-buffer-setup-hook))
+      (setq-local font-lock-support-mode nil))
     eshell-syntax-highlighting--indirect-lisp-buffer))
 
 (defun eshell-syntax-highlighting--highlight-elisp (beg end)
