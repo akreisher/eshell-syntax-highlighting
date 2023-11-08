@@ -178,7 +178,7 @@
                     (make-indirect-buffer
                      (current-buffer)
                      (generate-new-buffer-name
-                      (concat " " (buffer-name) "-eshell-indirect"))))
+                      (concat " " (buffer-name) "-esh-elisp-indirect"))))
       (setq-local delay-mode-hooks t)
       (let ((change-major-mode-hook nil)
             (after-change-major-mode-hook nil))
