@@ -167,14 +167,17 @@
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
-(defvar eshell-syntax-highlighting--indirect-lisp-buffer nil)
+(defvar eshell-syntax-highlighting--indirect-elisp-buffer nil)
 
-(defun eshell-syntax-highlighting--indirect-buffer ()
-  "Return the indirect buffer for syntax highlighting."
-  (if (buffer-live-p eshell-syntax-highlighting--indirect-lisp-buffer)
-      eshell-syntax-highlighting--indirect-lisp-buffer
+(defvar eshell-syntax-highlighting-elisp-buffer-setup-hook nil
+  "Hook run to configure syntax highlighting in an indirect ELisp buffer.")
+
+(defun eshell-syntax-highlighting--get-indirect-elisp-buffer ()
+  "Return the indirect buffer for Emacs Lisp syntax highlighting."
+  (if (buffer-live-p eshell-syntax-highlighting--indirect-elisp-buffer)
+      eshell-syntax-highlighting--indirect-elisp-buffer
     (with-current-buffer
-        (setq-local eshell-syntax-highlighting--indirect-lisp-buffer
+        (setq-local eshell-syntax-highlighting--indirect-elisp-buffer
                     (make-indirect-buffer
                      (current-buffer)
                      (generate-new-buffer-name
@@ -184,8 +187,9 @@
             (after-change-major-mode-hook nil))
         (emacs-lisp-mode))
       (setq-local font-lock-dont-widen t)
-      (setq-local font-lock-support-mode nil))
-    eshell-syntax-highlighting--indirect-lisp-buffer))
+      (setq-local font-lock-support-mode nil)
+      (run-hooks 'eshell-syntax-highlighting-elisp-buffer-setup-hook))
+    eshell-syntax-highlighting--indirect-elisp-buffer))
 
 (defun eshell-syntax-highlighting--highlight-elisp (beg end)
   "Highlight Emacs Lisp in region (BEG, END) through an indirect buffer."
@@ -193,7 +197,7 @@
     (let ((elisp-end (condition-case nil
                          (scan-sexps beg 1)
                        (scan-error end))))
-      (with-current-buffer (eshell-syntax-highlighting--indirect-buffer)
+      (with-current-buffer (eshell-syntax-highlighting--get-indirect-elisp-buffer)
         (narrow-to-region beg elisp-end)
         (font-lock-fontify-region beg elisp-end))
       (goto-char elisp-end))))
