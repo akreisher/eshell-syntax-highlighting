@@ -167,25 +167,40 @@
            (t 'eshell-syntax-highlighting-default-face))))
     (add-face-text-property beg end face)))
 
+(defvar eshell-syntax-highlighting--indirect-lisp-buffer nil)
+
+(defvar eshell-syntax-highlighting-indirect-buffer-setup-hook nil
+  "Hook run to setup the in-direct buffer used for syntax highlighting Elisp.")
+
+(defun eshell-syntax-highlighting--indirect-buffer ()
+  "Return the indirect buffer for syntax highlighting."
+  (if (buffer-live-p eshell-syntax-highlighting--indirect-lisp-buffer)
+      eshell-syntax-highlighting--indirect-lisp-buffer
+    (with-current-buffer
+        (setq-local eshell-syntax-highlighting--indirect-lisp-buffer
+                    (make-indirect-buffer
+                     (current-buffer)
+                     (generate-new-buffer-name
+                      (concat " " (buffer-name) "-eshell-indirect"))))
+      (setq-local delay-mode-hooks t)
+      (let ((change-major-mode-hook nil)
+            (after-change-major-mode-hook nil))
+        (emacs-lisp-mode))
+      (setq-local font-lock-dont-widen t)
+      (setq-local font-lock-support-mode nil)
+      (run-hooks 'eshell-syntax-highlighting-indirect-buffer-setup-hook))
+    eshell-syntax-highlighting--indirect-lisp-buffer))
+
 (defun eshell-syntax-highlighting--highlight-elisp (beg end)
-  "Highlight Emacs Lisp in region (BEG, END) natively through a temp buffer."
-  (let* ((elisp-end (condition-case
-                        nil (scan-sexps beg 1)
-                      (scan-error end)))
-         (str (buffer-substring-no-properties beg elisp-end)))
-    (if (not eshell-syntax-highlighting-highlight-elisp)
-        (eshell-syntax-highlighting--highlight beg (point) 'default)
-      (goto-char beg)
-      (insert
-       (with-temp-buffer
-         (erase-buffer)
-         (insert str)
-         (delay-mode-hooks (emacs-lisp-mode))
-         (font-lock-default-function 'emacs-lisp-mode)
-         (font-lock-default-fontify-region (point-min) (point-max) nil)
-         (buffer-string)))
-      (delete-region (point) (+ (point) (length str))))
-    (goto-char elisp-end)))
+  "Highlight Emacs Lisp in region (BEG, END) through an indirect buffer."
+  (when eshell-syntax-highlighting-highlight-elisp
+    (let ((elisp-end (condition-case nil
+                         (scan-sexps beg 1)
+                       (scan-error end))))
+      (with-current-buffer (eshell-syntax-highlighting--indirect-buffer)
+        (narrow-to-region beg elisp-end)
+        (font-lock-fontify-region beg elisp-end))
+      (goto-char elisp-end))))
 
 (defun eshell-syntax-highlighting--highlight-substitutions (beg end)
   "Find and highlight command substitutions in region (BEG, END)."
