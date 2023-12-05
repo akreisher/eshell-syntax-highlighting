@@ -194,9 +194,11 @@
 (defun eshell-syntax-highlighting--highlight-elisp (beg end)
   "Highlight Emacs Lisp in region (BEG, END) through an indirect buffer."
   (when eshell-syntax-highlighting-highlight-elisp
-    (let ((elisp-end (condition-case nil
-                         (scan-sexps beg 1)
-                       (scan-error end))))
+    (let ((elisp-end (or
+                      (condition-case nil
+                          (scan-sexps beg 1)
+                        (scan-error nil))
+                      end)))
       (with-current-buffer (eshell-syntax-highlighting--get-indirect-elisp-buffer)
         (narrow-to-region beg elisp-end)
         (font-lock-fontify-region beg elisp-end))
@@ -346,7 +348,7 @@
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Comments
-     ((looking-at "#\\(?:[^<]\\|\\'\\)")
+     ((looking-at "#\\(?:[^<']\\|\\'\\)")
       (eshell-syntax-highlighting--highlight beg end 'comment))
 
      ;; Options
@@ -370,14 +372,14 @@
         (eshell-syntax-highlighting--highlight beg (point) 'delimiter))
       (eshell-syntax-highlighting--parse-and-highlight 'command end))
 
+     ;; Quoted or parenthesized Emacs Lisp
+     ((looking-at-p "\\(#'\\|`\\|(\\)")
+      (eshell-syntax-highlighting--highlight-elisp beg end)
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Commands
      ((eq expected 'command)
       (cond
-       ;; Parenthesized Emacs Lisp
-       ((looking-at-p "(")
-        (eshell-syntax-highlighting--highlight-elisp beg end)
-        (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
 	   ;; Environment variable definition
 	   ((looking-at "[[:alpha:]_][[:alnum:]_]*=")
