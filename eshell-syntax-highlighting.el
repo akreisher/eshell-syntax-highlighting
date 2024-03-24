@@ -1,9 +1,9 @@
 ;;; eshell-syntax-highlighting.el --- Highlight eshell commands  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2020-2023 Alex Kreisher
+;; Copyright (C) 2020-2024 Alex Kreisher
 
 ;; Author: Alex Kreisher <akreisher18@gmail.com>
-;; Version: 0.5
+;; Version: 0.6
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/akreisher/eshell-syntax-highlighting
