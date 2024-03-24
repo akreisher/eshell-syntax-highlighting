@@ -358,8 +358,8 @@
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Redirection
-     ((and (looking-at ">") (eq expected 'argument))
-      (re-search-forward ">+\\s-*" end t)
+     ((and (eq expected 'argument)
+           (re-search-forward "[0-9&]?>+\\(&[0-9]?\\)?\\s-*" end t))
       (if (not (looking-at "#<"))
           (eshell-syntax-highlighting--highlight-filename (point) end)
         ;; Redirection to buffer #<buffer-name>.
