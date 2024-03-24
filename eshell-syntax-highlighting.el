@@ -406,15 +406,15 @@
      ((eq expected 'command)
       (cond
 
-	   ;; Environment variable definition
-	   ((looking-at "[[:alpha:]_][[:alnum:]_]*=")
+       ;; Environment variable definition
+       ((looking-at "[[:alpha:]_][[:alnum:]_]*=")
         (goto-char (min end (match-end 0)))
-		(if (looking-at "[\"']")
+        (if (looking-at "[\"']")
             (progn (when (< (point) end) (forward-char))
-		           (eshell-syntax-highlighting--find-unescaped (match-string 0) end))
-		  (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position))))
-		(eshell-syntax-highlighting--highlight beg (point) 'envvar)
-		(eshell-syntax-highlighting--parse-and-highlight 'command end))
+                   (eshell-syntax-highlighting--find-unescaped (match-string 0) end))
+          (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position))))
+        (eshell-syntax-highlighting--highlight beg (point) 'envvar)
+        (eshell-syntax-highlighting--parse-and-highlight 'command end))
 
        ;; Command string
        (t
