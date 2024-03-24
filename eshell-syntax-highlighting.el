@@ -359,7 +359,8 @@
 
      ;; Redirection
      ((and (eq expected 'argument)
-           (re-search-forward "[0-9&]?>+\\(&[0-9]?\\)?\\s-*" end t))
+           (looking-at "[0-9&]?>+\\(?:&[0-9]?\\)?\\s-*"))
+      (goto-char (match-end 0))
       (if (not (looking-at "#<"))
           (eshell-syntax-highlighting--highlight-filename (point) end)
         ;; Redirection to buffer #<buffer-name>.
