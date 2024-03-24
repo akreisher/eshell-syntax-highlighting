@@ -45,7 +45,3 @@ Faces in this package inherit from standard faces to match your theming. If this
     ~M-x customize-group eshell-syntax-highlighting~
 
 to customize the faces used by this package.
-
-** Todo
-
-- [ ] Parse for loops

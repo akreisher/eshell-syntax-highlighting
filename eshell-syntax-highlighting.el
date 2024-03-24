@@ -320,9 +320,12 @@
 
           ;; For loop
           ;; Disable highlighting from here on out
-          ((string-equal "for" command)
-           (eshell-syntax-highlighting--highlight beg end 'default)
-           (goto-char end)
+          ((and (string-equal "for" command)
+                (looking-at (format "\\s-+\\(%s\\)\\s-+\\(in\\)" eshell-syntax-highlighting--word-boundary-regexp)))
+           (eshell-syntax-highlighting--highlight beg (point) 'command)
+           (eshell-syntax-highlighting--highlight (match-beginning 1) (match-end 1) 'envvar)
+           (eshell-syntax-highlighting--highlight (match-beginning 2) (match-end 2) 'command)
+           (goto-char (match-end 0))
            'argument)
 
           ;; Directory for cd
@@ -349,6 +352,11 @@
      ;; Exit at eol
      ((eolp) nil)
      ((>= beg end) nil)
+
+     ;; Command Block
+     ((eq (char-after) ?\{)
+      (eshell-syntax-highlighting--highlight-command-substitution ?\{ ?\} end)
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Redirection
      ((and (looking-at ">") (eq expected 'argument))
