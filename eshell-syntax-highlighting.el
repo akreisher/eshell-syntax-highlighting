@@ -321,7 +321,7 @@
           ;; For loop
           ;; Disable highlighting from here on out
           ((and (string-equal "for" command)
-                (looking-at (format "\\s-+\\(%s\\)\\s-+\\(in\\)" eshell-syntax-highlighting--word-boundary-regexp)))
+                (looking-at (format "\\s-+\\(%s\\)\\s-+\\(in\\)\\s-+" eshell-syntax-highlighting--word-boundary-regexp)))
            (eshell-syntax-highlighting--highlight beg (point) 'command)
            (eshell-syntax-highlighting--highlight (match-beginning 1) (match-end 1) 'envvar)
            (eshell-syntax-highlighting--highlight (match-beginning 2) (match-end 2) 'command)
