@@ -137,15 +137,10 @@
       (executable-find command)
     (executable-find command t)))
 
-(defun eshell-syntax-highlighting--find-unescaped (seq end)
-  "Find first unescaped instance of SEQ before END."
-  (if (looking-at (concat "\\(?:\\\\\\\\\\)*" seq))
-      (when (<= (match-end 0) end)
-        (goto-char (match-end 0))
-        (point))
-    (re-search-forward
-     (concat "\\(?:\\(?:[^\\\\]\\(?:\\\\\\\\\\)+\\|[^\\\\]\\)\\)" seq)
-     end t)))
+(defun eshell-syntax-highlighting--goto-string-end (quote end)
+  "Find end of string marked by QUOTE before END."
+  (goto-char (or (eshell-find-delimiter quote quote end nil t) end))
+  (if (eq (char-after) quote) (forward-char)))
 
 (defun eshell-syntax-highlighting--escaped-p (&optional point escaped)
   "Return t if char at POINT is escaped, with ESCAPED as prev escape state."
@@ -260,9 +255,9 @@
   (let ((curr-point (point)))
     (goto-char beg)
     (while (and (< (point) end)
-                (eshell-syntax-highlighting--find-unescaped
-                 eshell-syntax-highlighting--substitution-start-regexp end))
-      (goto-char (match-beginning 1))
+                (re-search-forward eshell-syntax-highlighting--substitution-start-regexp end t)
+                (not (eshell-syntax-highlighting--escaped-p (match-beginning 0))))
+      (goto-char (match-beginning 0))
       (eshell-syntax-highlighting--highlight-substitution end))
     (goto-char curr-point)))
 
@@ -423,11 +418,16 @@
        ;; Environment variable definition
        ((looking-at "[[:alpha:]_][[:alnum:]_]*=")
         (goto-char (min end (match-end 0)))
-        (if (looking-at "[\"']")
-            (progn (when (< (point) end) (forward-char))
-                   (eshell-syntax-highlighting--find-unescaped (match-string 0) end))
-          (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position))))
-        (eshell-syntax-highlighting--highlight beg (point) 'envvar)
+        (cond
+         ((eq (char-after) ?\")
+          (eshell-syntax-highlighting--goto-string-end ?\" end)
+          (eshell-syntax-highlighting--highlight-with-substitutions beg (point) 'envvar))
+         ((eq (char-after) ?\')
+          (eshell-syntax-highlighting--goto-string-end ?\' end)
+          (eshell-syntax-highlighting--highlight beg (point) 'envvar))
+         (t (re-search-forward
+             eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position)))
+            (eshell-syntax-highlighting--highlight beg (point) 'envvar)))
         (eshell-syntax-highlighting--parse-and-highlight 'command end))
 
        ;; Command string
@@ -439,12 +439,10 @@
       (cond
        ;; Quoted strings
        ((eq (char-after) ?\')
-        (when (eq (char-after) ?\') (forward-char))
-        (goto-char (or (eshell-find-delimiter ?\' ?\' end nil t) end))
+        (eshell-syntax-highlighting--goto-string-end ?\' end)
         (eshell-syntax-highlighting--highlight beg (point) 'string))
        ((eq (char-after) ?\")
-        (goto-char (or (eshell-find-delimiter ?\" ?\" end nil t) end))
-        (when (eq (char-after) ?\") (forward-char))
+        (eshell-syntax-highlighting--goto-string-end ?\" end)
         (eshell-syntax-highlighting--highlight-with-substitutions beg (point) 'string))
        ;; Argument
        (t
