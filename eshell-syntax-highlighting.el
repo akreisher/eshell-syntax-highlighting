@@ -128,7 +128,7 @@
   :group 'eshell-syntax-highlighting)
 
 
-(defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;]*")
+(defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;$]*")
 
 (defun eshell-syntax-highlighting--executable-find (command)
   "Check if COMMAND is on the variable `exec-path'."
@@ -144,7 +144,7 @@
         (point))
     (re-search-forward
      (concat "\\(?:\\(?:[^\\\\]\\(?:\\\\\\\\\\)+\\|[^\\\\]\\)\\)" seq)
-     end end)))
+     end t)))
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from BEG to END based on TYPE."
@@ -204,40 +204,53 @@
         (font-lock-fontify-region beg elisp-end))
       (goto-char elisp-end))))
 
-(defun eshell-syntax-highlighting--highlight-substitutions (beg end)
-  "Find and highlight command substitutions in region (BEG, END)."
+(defun eshell-syntax-highlighting--highlight-command-substitution (beg-symbol end-symbol end)
+  "Highlight a command between BEG-SYMBOL and END-SYMBOL until END."
+  (forward-char)
+  (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+  (eshell-syntax-highlighting--parse-and-highlight
+   'command
+   (or (eshell-find-delimiter beg-symbol end-symbol end) end))
+  (when (eq (char-after) end-symbol)
+    (forward-char)
+    (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)))
+
+(defun eshell-syntax-highlighting--highlight-substitution (end default-type)
+  "Highlight a dollar substitution until END, using DEFAULT-TYPE if there is none."
+  (let ((start (point)))
+    (when (eq (char-after) ?$)
+      (forward-char)
+      (when (eq (char-after) ?@)
+        (forward-char)))
+    (cond
+     ;; Command substitutions.
+     ((eq (char-after) ?{)
+      (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+      (eshell-syntax-highlighting--highlight-command-substitution ?{ ?} end))
+     ((eq (char-after) ?<)
+      (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+      (eshell-syntax-highlighting--highlight-command-substitution ?< ?> end))
+     ;; Elisp substitutions.
+     ((eq (char-after) ?\()
+      (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+      (eshell-syntax-highlighting--highlight-elisp (point) end))
+     ;; Variable substitutions.
+     ((looking-at "\\([0-9*$]\\|[[:alpha:]][[:alnum:]-_]*\\)")
+      (goto-char (min (match-end 0) end))
+      ;; Handle variable indexing
+      (if (looking-at "\\[" t)
+          ;; Jump to matching bracket or end.
+          (goto-char (or (eshell-find-delimiter ?\[ ?\] end) end))
+        (eshell-syntax-highlighting--highlight start (point) 'envvar)))
+     (t (eshell-syntax-highlighting--highlight start (point) default-type)))))
+
+(defun eshell-syntax-highlighting--highlight-substitutions (beg end default-type)
+  "Find and highlight substitutitions between BEG and END, with DEFAULT-TYPE."
   (let ((curr-point (point)))
     (goto-char beg)
-    (while (and (eshell-syntax-highlighting--find-unescaped "\\(\\$@?\\)" end) (< (point) end))
-      (cond
-       ((looking-at "{\\|<" t)
-        ;; Command substitution
-        (let* ((match-symbol (if (eq ?{ (char-after)) "}" ">"))
-               (start (match-beginning 1))
-               (subs-start (+ (point) 1))
-               (subs-end (progn (eshell-syntax-highlighting--find-unescaped match-symbol end)
-                                (backward-char)
-                                (when (not (looking-at match-symbol))
-                                  (forward-char))
-                                (point))))
-          (goto-char subs-start)
-          (eshell-syntax-highlighting--highlight start (point) 'substitution)
-          (eshell-syntax-highlighting--parse-and-highlight 'command subs-end)
-          (when (looking-at match-symbol)
-            (forward-char)
-            (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution))))
-       ((looking-at "(" t)
-        ;; Elisp substitution
-        (eshell-syntax-highlighting--highlight (match-beginning 1) (point) 'substitution)
-        (eshell-syntax-highlighting--highlight-elisp (point) end))
-       (t
-        ;; Variable substitution
-        (let ((start (match-beginning 1)))
-          (when (looking-at "\\([0-9*$]\\|[[:alpha:]][[:alnum:]-_]*\\)")
-            (goto-char (min (match-end 0) end))
-            ;; Handle variable indexing
-            (if (looking-at "\\[") (eshell-syntax-highlighting--find-unescaped "]" end))
-            (eshell-syntax-highlighting--highlight start (point) 'envvar))))))
+    (while (and (< (point) end) (eshell-syntax-highlighting--find-unescaped "\\(\\$@?\\)" end))
+      (goto-char (match-beginning 1))
+      (eshell-syntax-highlighting--highlight-substitution end default-type))
     (goto-char curr-point)))
 
 
@@ -320,7 +333,6 @@
           (t
            (eshell-syntax-highlighting--highlight beg (point) 'invalid)
            'argument))))
-    (eshell-syntax-highlighting--highlight-substitutions beg (point))
     (eshell-syntax-highlighting--parse-and-highlight next-expected end)))
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected end)
@@ -340,11 +352,16 @@
      ((and (looking-at ">") (eq expected 'argument))
       (re-search-forward ">+\\s-*" end t)
       (if (not (looking-at "#<"))
-          ;; Redirect to normal file.
           (eshell-syntax-highlighting--highlight-filename (point) end)
         ;; Redirection to buffer #<buffer-name>.
-        (eshell-syntax-highlighting--find-unescaped ">" end)
-        (eshell-syntax-highlighting--highlight beg (point) 'default))
+        (forward-char)
+        (let ((start (+ (point) 1)))
+          (goto-char (or (eshell-find-delimiter ?< ?> end) end))
+          (eshell-syntax-highlighting--highlight beg (point) 'default)
+          (eshell-syntax-highlighting--highlight-substitutions start (point) 'default)
+          (when (eq (char-after) ?>)
+            (forward-char)
+            (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'default))))
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Comments
@@ -355,7 +372,6 @@
      ((looking-at "-")
       (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position)))
       (eshell-syntax-highlighting--highlight beg (point) 'option)
-      (eshell-syntax-highlighting--highlight-substitutions beg end)
       (eshell-syntax-highlighting--parse-and-highlight expected end))
 
      ;; Line-wrapping backslash
@@ -389,7 +405,6 @@
 		           (eshell-syntax-highlighting--find-unescaped (match-string 0) end))
 		  (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position))))
 		(eshell-syntax-highlighting--highlight beg (point) 'envvar)
-        (eshell-syntax-highlighting--highlight-substitutions beg (point))
 		(eshell-syntax-highlighting--parse-and-highlight 'command end))
 
        ;; Command string
@@ -399,24 +414,22 @@
 
      (t
       (cond
-       ;; Quoted string
-       ((looking-at "[\"']")
-        (let ((string-quote (match-string 0)))
-          (when (<= (point) end) (forward-char))
-		  (eshell-syntax-highlighting--find-unescaped string-quote end)
-          (eshell-syntax-highlighting--highlight beg (point) 'string)
-          (unless (string= string-quote "'")
-            (eshell-syntax-highlighting--highlight-substitutions beg (point))))
-        (eshell-syntax-highlighting--parse-and-highlight 'argument end))
-
+       ;; Quoted strings
+       ((eq (char-after) ?\')
+        (goto-char (or (eshell-find-delimiter ?\' ?\' end nil t) end))
+        (eshell-syntax-highlighting--highlight beg (point) 'string)
+        (when (eq (char-after) ?\') (forward-char)))
+       ((eq (char-after) ?\")
+        (goto-char (or (eshell-find-delimiter ?\" ?\" end nil t) end))
+        (eshell-syntax-highlighting--highlight beg (point) 'string)
+        (eshell-syntax-highlighting--highlight-substitutions beg (point) 'string)
+        (when (eq (char-after) ?\") (forward-char)))
        ;; Argument
        (t
-        (eshell-syntax-highlighting--highlight-filename beg end)
-        ;; TODO: Handle this better.
-        ;; Right now, this will only highlight the command, and any args are
-        ;; handled outside the substitution, leading to un-highlighted end delim.
-        (eshell-syntax-highlighting--highlight-substitutions beg (point))
-        (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))))
+        (if (eq (char-after) ?$)
+            (eshell-syntax-highlighting--highlight-substitution end 'default)
+          (eshell-syntax-highlighting--highlight-filename beg end))))
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))
 
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
