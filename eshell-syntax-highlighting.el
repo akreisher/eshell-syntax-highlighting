@@ -455,7 +455,7 @@
       (with-silent-modifications
         (save-excursion
           (goto-char eshell-last-output-end)
-          (eshell-next-prompt)
+          (eshell-next-prompt 1)
           (eshell-syntax-highlighting--parse-and-highlight 'command (point-max))))
       ;; save-excursion marker is deleted when highlighting elisp,
       ;; so explicitly pop back to initial point.
