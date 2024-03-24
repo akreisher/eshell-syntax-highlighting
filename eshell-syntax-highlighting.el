@@ -38,11 +38,12 @@
   (require 'esh-mode)
   (require 'eshell)
   (require 'em-alias)
-  (require 'em-dirs)
-  (require 'em-prompt))
+  (require 'em-dirs))
+
 
 (require 'esh-util)
 (require 'em-alias)
+(require 'em-prompt)
 
 
 (defgroup eshell-syntax-highlighting nil
@@ -445,9 +446,8 @@
       (with-silent-modifications
         (save-excursion
           (goto-char eshell-last-output-end)
-          (forward-line 0)
-          (when (re-search-forward eshell-prompt-regexp (line-end-position) t)
-            (eshell-syntax-highlighting--parse-and-highlight 'command (point-max)))))
+          (eshell-next-prompt)
+          (eshell-syntax-highlighting--parse-and-highlight 'command (point-max))))
       ;; save-excursion marker is deleted when highlighting elisp,
       ;; so explicitly pop back to initial point.
       (goto-char beg))))
