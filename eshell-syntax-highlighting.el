@@ -286,7 +286,8 @@
            'argument)
 
           ;; Explicit external command
-          ((and (char-equal eshell-explicit-command-char (aref command 0))
+          ((and (not (string-empty-p command))
+                (char-equal eshell-explicit-command-char (aref command 0))
                 (eshell-syntax-highlighting--executable-find (substring command 1 nil)))
            (eshell-syntax-highlighting--highlight beg (point) 'command)
            'argument)
