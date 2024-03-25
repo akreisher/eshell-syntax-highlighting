@@ -230,14 +230,14 @@
     (cond
      ;; Command substitutions.
      ((eq (char-after) ?{)
-      (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+      (eshell-syntax-highlighting--highlight start (point) 'substitution)
       (eshell-syntax-highlighting--highlight-command-substitution ?{ ?} end))
      ((eq (char-after) ?<)
-      (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+      (eshell-syntax-highlighting--highlight start (point) 'substitution)
       (eshell-syntax-highlighting--highlight-command-substitution ?< ?> end))
      ;; Elisp substitutions.
      ((eq (char-after) ?\()
-      (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)
+      (eshell-syntax-highlighting--highlight start (point) 'substitution)
       (eshell-syntax-highlighting--highlight-elisp (point) end))
      ;; Variable substitutions.
      ((looking-at "\\([0-9*$]\\|[[:alpha:]][[:alnum:]-_]*\\)")
