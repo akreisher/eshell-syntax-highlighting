@@ -400,12 +400,6 @@
      ((looking-at "#\\(?:[^<']\\|\\'\\)")
       (eshell-syntax-highlighting--highlight beg end 'comment))
 
-     ;; Options
-     ((looking-at "-")
-      (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position)))
-      (eshell-syntax-highlighting--highlight beg (point) 'option)
-      (eshell-syntax-highlighting--parse-and-highlight expected end))
-
      ;; Line-wrapping backslash
      ((looking-at "\\\\\n")
       (goto-char (min end (match-end 0)))
@@ -449,18 +443,27 @@
         (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position)))
         (eshell-syntax-highlighting--parse-command beg end (match-string-no-properties 0)))))
 
-     (t
-      (cond
-       ;; Quoted strings
-       ((or (eq (char-after) ?\') (eq (char-after) ?\"))
-        (eshell-syntax-highlighting--highlight-string (char-after) end))
-       ;; Argument
-       (t
-        (if (and (looking-at eshell-syntax-highlighting--substitution-start-regexp t)
-                 (not (eshell-syntax-highlighting--escaped-p)))
-            (eshell-syntax-highlighting--highlight-substitution end)
-          (eshell-syntax-highlighting--highlight-filename beg end))))
-      (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))
+     ;; Quoted strings
+     ((or (eq (char-after) ?\') (eq (char-after) ?\"))
+      (eshell-syntax-highlighting--highlight-string (char-after) end)
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end))
+
+     ;; Options
+     ((eq (char-after) ?-)
+      (re-search-forward eshell-syntax-highlighting--word-boundary-regexp (min end (line-end-position)))
+      (eshell-syntax-highlighting--highlight beg (point) 'option)
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end))
+
+     ;; Argument $ substitution
+     ((and (looking-at eshell-syntax-highlighting--substitution-start-regexp t)
+           (not (eshell-syntax-highlighting--escaped-p)))
+      (eshell-syntax-highlighting--highlight-substitution end)
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end))
+
+     ;; Arguments
+     (t (eshell-syntax-highlighting--highlight-filename beg end)
+        (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))
+
 
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
