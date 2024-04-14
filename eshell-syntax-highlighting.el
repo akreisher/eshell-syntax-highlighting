@@ -218,14 +218,15 @@
     (forward-char)
     (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)))
 
-(defvar eshell-syntax-highlighting--substitution-start-regexp "\\$@?[0-9a-zA-Z*${\(<]")
+(defvar eshell-syntax-highlighting--substitution-start-regexp "\\$\\(?:#\\|@\\)?[0-9a-zA-Z*${\(<'\"]")
 
 (defun eshell-syntax-highlighting--highlight-substitution (end)
   "Highlight a dollar substitution until END."
   (let ((start (point)))
     (when (eq (char-after) ?$)
       (forward-char)
-      (when (eq (char-after) ?@)
+      (when (or (eq (char-after) ?@)
+                (eq (char-after) ?#))
         (forward-char)))
     (cond
      ;; Command substitutions.
@@ -240,6 +241,9 @@
       (eshell-syntax-highlighting--highlight start (point) 'substitution)
       (eshell-syntax-highlighting--highlight-elisp (point) end))
      ;; Variable substitutions.
+     ((or (eq (char-after) ?\') (eq (char-after) ?\"))
+      (eshell-syntax-highlighting--highlight start (point) 'envvar)
+      (eshell-syntax-highlighting--highlight-string (char-after) end 'envvar))
      ((looking-at "\\([0-9*$]\\|[[:alpha:]][[:alnum:]-_]*\\)")
       (goto-char (min (match-end 0) end))
       ;; Handle variable indexing
@@ -260,6 +264,16 @@
       (goto-char (match-beginning 0))
       (eshell-syntax-highlighting--highlight-substitution end))
     (goto-char curr-point)))
+
+(defun eshell-syntax-highlighting--highlight-string (quote-char end &optional face)
+  "Highlight a string starting with QUOTE-CHAR until END with FACE, defaulting to string."
+  (let ((beg (point))
+        (face (or face 'string)))
+    (eshell-syntax-highlighting--goto-string-end quote-char end)
+    (if (eq quote-char ?\")
+        ;; Double quotes can have nested substitutions.
+        (eshell-syntax-highlighting--highlight-with-substitutions beg (point) face)
+      (eshell-syntax-highlighting--highlight beg (point) face))))
 
 
 (defun eshell-syntax-highlighting--highlight-filename (beg end)
@@ -438,12 +452,8 @@
      (t
       (cond
        ;; Quoted strings
-       ((eq (char-after) ?\')
-        (eshell-syntax-highlighting--goto-string-end ?\' end)
-        (eshell-syntax-highlighting--highlight beg (point) 'string))
-       ((eq (char-after) ?\")
-        (eshell-syntax-highlighting--goto-string-end ?\" end)
-        (eshell-syntax-highlighting--highlight-with-substitutions beg (point) 'string))
+       ((or (eq (char-after) ?\') (eq (char-after) ?\"))
+        (eshell-syntax-highlighting--highlight-string (char-after) end))
        ;; Argument
        (t
         (if (and (looking-at eshell-syntax-highlighting--substitution-start-regexp t)
