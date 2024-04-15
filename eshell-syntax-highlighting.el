@@ -246,11 +246,18 @@
       (eshell-syntax-highlighting--highlight-string (char-after) end 'envvar))
      ((looking-at "\\([0-9*$]\\|[[:alpha:]][[:alnum:]-_]*\\)")
       (goto-char (min (match-end 0) end))
-      ;; Handle variable indexing
-      (if (looking-at "\\[" t)
-          ;; Jump to matching bracket or end.
-          (goto-char (or (eshell-find-delimiter ?\[ ?\] end) end))
-        (eshell-syntax-highlighting--highlight start (point) 'envvar))))))
+      (eshell-syntax-highlighting--highlight start (point) 'envvar))))
+
+  ;; Handle an arbitrary number of variable indexing (e.g. $my_var[0][1]...)
+  (while (and (< (point) end) (eq (char-after) ?\[))
+    (eshell-syntax-highlighting--highlight (point) (+ (point) 1) 'substitution)
+    (let ((end-pos (or (eshell-find-delimiter ?\[ ?\] end) end)))
+      (forward-char)
+      (eshell-syntax-highlighting--highlight (point) end-pos 'default)
+      (goto-char end-pos)
+      (when (eq (char-after) ?\])
+        (eshell-syntax-highlighting--highlight end-pos (+ end-pos 1) 'substitution)
+        (forward-char)))))
 
 
 (defun eshell-syntax-highlighting--highlight-with-substitutions (beg end type)
