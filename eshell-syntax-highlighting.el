@@ -98,9 +98,9 @@
   "Face used for valid shell in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
-(defface eshell-syntax-highlighting-lisp-function-face
-  '((t :inherit font-lock-function-name-face))
-  "Face used for Emacs Lisp functions."
+(defface eshell-syntax-highlighting-builtin-command-face
+  '((t :inherit eshell-syntax-highlighting-shell-command-face))
+  "Face used for a builtin Eshell command."
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-alias-face
@@ -156,6 +156,7 @@
          (cl-case type
            (default 'eshell-syntax-highlighting-default-face)
            (command 'eshell-syntax-highlighting-shell-command-face)
+           (builtin 'eshell-syntax-highlighting-builtin-command-face)
            (alias 'eshell-syntax-highlighting-alias-face)
            (lisp 'eshell-syntax-highlighting-lisp-function-face)
            (string 'eshell-syntax-highlighting-string-face)
@@ -309,10 +310,29 @@
     (forward-char)
     (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)))
 
+(defvar eshell-syntax-highlighting--control-flow-commands '("if" "unless" "while" "until"))
+
 (defun eshell-syntax-highlighting--parse-command (beg end command)
   "Parse COMMAND in region (BEG, END) and highlight."
   (let ((next-expected
          (cond
+
+          ;; For loop with in (e.g. for my_var in (1 2 3) ...)
+          ((and (string-equal "for" command)
+                (looking-at (format "\\s-+\\(%s\\)\\s-+\\(in\\)\\s-+"
+                                    eshell-syntax-highlighting--word-boundary-regexp)))
+           (eshell-syntax-highlighting--highlight beg (point) 'builtin)
+           (eshell-syntax-highlighting--highlight (match-beginning 1) (match-end 1) 'envvar)
+           (eshell-syntax-highlighting--highlight (match-beginning 2) (match-end 2) 'builtin)
+           (goto-char (match-end 0))
+           'argument)
+
+          ;; Other control flow
+          ((member command eshell-syntax-highlighting--control-flow-commands)
+           (eshell-syntax-highlighting--highlight beg (point) 'builtin)
+           ;; TODO: Parse conditional here
+           'argument)
+
           ;; Command wrappers (sudo, time)
           ((string-match "^\\(\\*\\|eshell/\\)?\\(sudo\\|time\\)$" command)
            (eshell-syntax-highlighting--highlight
@@ -344,7 +364,7 @@
 
           ;; Built-in
           ((functionp (intern (concat "eshell/" command)))
-           (eshell-syntax-highlighting--highlight beg (point) 'command)
+           (eshell-syntax-highlighting--highlight beg (point) 'builtin)
            'argument)
 
           ;; Prioritized lisp function
@@ -363,15 +383,6 @@
            (eshell-syntax-highlighting--highlight beg (point) 'lisp)
            'argument)
 
-          ;; For loop
-          ((and (string-equal "for" command)
-                (looking-at (format "\\s-+\\(%s\\)\\s-+\\(in\\)\\s-+"
-                                    eshell-syntax-highlighting--word-boundary-regexp)))
-           (eshell-syntax-highlighting--highlight beg (point) 'command)
-           (eshell-syntax-highlighting--highlight (match-beginning 1) (match-end 1) 'envvar)
-           (eshell-syntax-highlighting--highlight (match-beginning 2) (match-end 2) 'command)
-           (goto-char (match-end 0))
-           'argument)
 
           ;; Directory for cd
           ((and eshell-cd-on-directory
