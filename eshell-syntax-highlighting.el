@@ -79,7 +79,7 @@
   :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-delimiter-face
-  '((t :inherit default))
+  '((t :inherit font-lock-operator-face))
   "Face used for delimiters in an Eshell command."
   :group 'eshell-syntax-highlighting)
 
@@ -418,6 +418,7 @@
      ((and (eq expected 'argument)
            (looking-at "[0-9&]?>+\\(?:&[0-9]?\\)?\\s-*"))
       (goto-char (match-end 0))
+      (eshell-syntax-highlighting--highlight beg (point) 'delimiter)
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Comments
