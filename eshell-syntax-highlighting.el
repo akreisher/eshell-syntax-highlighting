@@ -129,7 +129,7 @@
   :group 'eshell-syntax-highlighting)
 
 
-(defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;$]*")
+(defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;$'\"]*")
 
 (defun eshell-syntax-highlighting--executable-find (command)
   "Check if COMMAND is on the variable `exec-path'."
