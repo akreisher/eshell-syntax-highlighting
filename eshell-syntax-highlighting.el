@@ -292,7 +292,7 @@
   (eshell-syntax-highlighting--highlight
    beg (point)
    (if (and
-        (not (string-= (match-string 0) ""))
+        (not (string-equal (match-string 0) ""))
         (file-exists-p (match-string 0)))
        'file-arg
      'default)))
@@ -351,7 +351,7 @@
            'argument)
 
           ;; Explicit external command
-          ((and (not (string-= command ""))
+          ((and (not (string-equal command ""))
                 (char-equal eshell-explicit-command-char (aref command 0))
                 (eshell-syntax-highlighting--executable-find (substring command 1 nil)))
            (eshell-syntax-highlighting--highlight beg (point) 'command)
