@@ -428,7 +428,7 @@
       (eshell-syntax-highlighting--parse-and-highlight 'command end))
 
      ;; Quoted or parenthesized Emacs Lisp
-     ((looking-at-p "\\(#'\\|`\\|(\\)")
+     ((looking-at-p eshell-lisp-regexp)
       (eshell-syntax-highlighting--highlight-elisp beg end)
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
