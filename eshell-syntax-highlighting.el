@@ -292,7 +292,7 @@
   (eshell-syntax-highlighting--highlight
    beg (point)
    (if (and
-        (not (string-empty-p (match-string 0)))
+        (not (string-= (match-string 0) ""))
         (file-exists-p (match-string 0)))
        'file-arg
      'default)))
@@ -351,7 +351,7 @@
            'argument)
 
           ;; Explicit external command
-          ((and (not (string-empty-p command))
+          ((and (not (string-= command ""))
                 (char-equal eshell-explicit-command-char (aref command 0))
                 (eshell-syntax-highlighting--executable-find (substring command 1 nil)))
            (eshell-syntax-highlighting--highlight beg (point) 'command)
@@ -485,7 +485,7 @@
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Argument $ substitution
-     ((and (looking-at eshell-syntax-highlighting--substitution-start-regexp t)
+     ((and (looking-at-p eshell-syntax-highlighting--substitution-start-regexp)
            (not (eshell-syntax-highlighting--escaped-p)))
       (eshell-syntax-highlighting--highlight-substitution end)
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
@@ -508,8 +508,8 @@
                 (not (file-remote-p default-directory))))
       (with-silent-modifications
         (save-excursion
-          (goto-char eshell-last-output-end)
-          (eshell-next-prompt 1)
+          (goto-char (point-max))
+          (eshell-previous-prompt 0)
           (eshell-syntax-highlighting--parse-and-highlight 'command (point-max))))
       ;; save-excursion marker is deleted when highlighting elisp,
       ;; so explicitly pop back to initial point.
