@@ -296,6 +296,19 @@
        'file-arg
      'default)))
 
+(defun eshell-syntax-highlighting--highlight-special-reference (end)
+  "Highlight a special argument reference starting with #< up til END."
+  (forward-char)
+  (eshell-syntax-highlighting--highlight (- (point) 1) (+ (point) 1) 'substitution)
+  (let ((end-pos (or (eshell-find-delimiter ?< ?> end) end)))
+    (forward-char)
+    ;; TODO: Highlight if buffer/process exists.
+    (eshell-syntax-highlighting--highlight-with-substitutions (point) end-pos 'default)
+    (goto-char end-pos))
+  (when (eq (char-after) ?>)
+    (forward-char)
+    (eshell-syntax-highlighting--highlight (- (point) 1) (point) 'substitution)))
+
 (defun eshell-syntax-highlighting--parse-command (beg end command)
   "Parse COMMAND in region (BEG, END) and highlight."
   (let ((next-expected
@@ -394,13 +407,6 @@
      ((and (eq expected 'argument)
            (looking-at "[0-9&]?>+\\(?:&[0-9]?\\)?\\s-*"))
       (goto-char (match-end 0))
-      (if (not (looking-at "#<"))
-          (eshell-syntax-highlighting--highlight-filename (point) end)
-        ;; Redirection to buffer #<buffer-name>.
-        (forward-char)
-        (goto-char (or (eshell-find-delimiter ?< ?> end) end))
-        (when (eq (char-after) ?>) (forward-char))
-        (eshell-syntax-highlighting--highlight-with-substitutions beg (point) 'default))
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Comments
@@ -424,6 +430,11 @@
      ;; Quoted or parenthesized Emacs Lisp
      ((looking-at-p "\\(#'\\|`\\|(\\)")
       (eshell-syntax-highlighting--highlight-elisp beg end)
+      (eshell-syntax-highlighting--parse-and-highlight 'argument end))
+
+     ;; Buffer/marker/process
+     ((looking-at "#<")
+      (eshell-syntax-highlighting--highlight-special-reference end)
       (eshell-syntax-highlighting--parse-and-highlight 'argument end))
 
      ;; Commands
