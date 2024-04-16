@@ -274,7 +274,7 @@
     (goto-char curr-point)))
 
 (defun eshell-syntax-highlighting--highlight-string (quote-char end &optional face)
-  "Highlight a string starting with QUOTE-CHAR until END with FACE, defaulting to string."
+  "Highlight a string with QUOTE-CHAR until END with FACE (default string)."
   (let ((beg (point))
         (face (or face 'string)))
     (eshell-syntax-highlighting--goto-string-end quote-char end)
