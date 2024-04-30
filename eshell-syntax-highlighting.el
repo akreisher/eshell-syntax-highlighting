@@ -495,17 +495,28 @@
         (eshell-syntax-highlighting--parse-and-highlight 'argument end)))))
 
 
+(defmacro eshell-syntax-highlighting--command-running-p ()
+  "Return non-nil if a foreground command is currently running."
+  (if (>= emacs-major-version 30)
+      '(eshell-head-process)
+    'eshell-current-command))
+
+
+(defun eshell-syntax-highlighting--enabled-p ()
+  "Return whether syntax highlighting should be enabled in the current buffer."
+  (and (eq major-mode 'eshell-mode)
+       (not eshell-non-interactive-p)
+       (not mark-active)
+       (not (eshell-syntax-highlighting--command-running-p))
+       (or
+        eshell-syntax-highlighting-highlight-in-remote-dirs
+        (not (file-remote-p default-directory)))))
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
   "Parse and highlight the command at the last Eshell prompt."
   (let ((beg (point))
         (non-essential t))
-    (when (and (eq major-mode 'eshell-mode)
-               (not eshell-non-interactive-p)
-               (not mark-active)
-               (or
-                eshell-syntax-highlighting-highlight-in-remote-dirs
-                (not (file-remote-p default-directory))))
+    (when (eshell-syntax-highlighting--enabled-p)
       (with-silent-modifications
         (save-excursion
           (goto-char (point-max))
