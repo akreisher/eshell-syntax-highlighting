@@ -103,6 +103,11 @@
   "Face used for a builtin Eshell command."
   :group 'eshell-syntax-highlighting)
 
+(defface eshell-syntax-highlighting-lisp-function-face
+  '((t :inherit font-lock-function-name-face))
+  "Face used for Emacs Lisp functions."
+  :group 'eshell-syntax-highlighting)
+
 (defface eshell-syntax-highlighting-alias-face
   '((t :inherit eshell-syntax-highlighting-shell-command-face))
   "Face used for Eshell aliases."
@@ -158,7 +163,7 @@
            (command 'eshell-syntax-highlighting-shell-command-face)
            (builtin 'eshell-syntax-highlighting-builtin-command-face)
            (alias 'eshell-syntax-highlighting-alias-face)
-           (lisp 'eshell-syntax-highlighting-lisp-function-face)
+           (lisp-function 'eshell-syntax-highlighting-lisp-function-face)
            (string 'eshell-syntax-highlighting-string-face)
            (invalid 'eshell-syntax-highlighting-invalid-face)
            (envvar 'eshell-syntax-highlighting-envvar-face)
@@ -339,7 +344,7 @@
             beg (point)
             (if (and (match-string 1 command)
                      (string-equal (match-string 1 command) "eshell/"))
-                'lisp
+                'lisp-function
               'command))
            'command)
 
@@ -370,7 +375,7 @@
           ;; Prioritized lisp function
           ((and eshell-prefer-lisp-functions
                 (functionp (intern command)))
-           (eshell-syntax-highlighting--highlight beg (point) 'lisp)
+           (eshell-syntax-highlighting--highlight beg (point) 'lisp-function)
            'argument)
 
           ;; Executable
@@ -378,9 +383,9 @@
            (eshell-syntax-highlighting--highlight beg (point) 'command)
            'argument)
 
-          ;; Lisp
+          ;; Lisp function
           ((functionp (intern command))
-           (eshell-syntax-highlighting--highlight beg (point) 'lisp)
+           (eshell-syntax-highlighting--highlight beg (point) 'lisp-function)
            'argument)
 
 
