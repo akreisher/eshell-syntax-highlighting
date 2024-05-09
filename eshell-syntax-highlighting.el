@@ -502,7 +502,7 @@
 
 (defmacro eshell-syntax-highlighting--command-running-p ()
   "Return non-nil if a foreground command is currently running."
-  (if (>= emacs-major-version 30)
+  (if (fboundp 'eshell-head-process)
       '(eshell-head-process)
     'eshell-current-command))
 
