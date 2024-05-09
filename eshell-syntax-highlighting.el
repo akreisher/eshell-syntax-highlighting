@@ -318,7 +318,7 @@
 (defvar eshell-syntax-highlighting--control-flow-commands '("if" "unless" "while" "until"))
 
 (defun eshell-syntax-highlighting--parse-command (beg end command)
-  "Parse COMMAND in region (BEG, END) and highlight."
+  "In region (BEG, END), parse COMMAND and highlight."
   (let ((next-expected
          (cond
 
