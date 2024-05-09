@@ -402,7 +402,7 @@
     (eshell-syntax-highlighting--parse-and-highlight next-expected end)))
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected end)
-  "Parse and highlight from point until END, expecting token of type EXPECTED."
+  "Parse and highlight EXPECTED token from point until END."
   ;; Whitespace
   (when (re-search-forward "\\s-*" end t)
     (eshell-syntax-highlighting--highlight
