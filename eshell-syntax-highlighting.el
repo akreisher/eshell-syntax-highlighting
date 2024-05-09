@@ -136,11 +136,11 @@
 
 (defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;$'\"]*")
 
-(defun eshell-syntax-highlighting--executable-find (command)
+(defmacro eshell-syntax-highlighting--executable-find (command)
   "Check if COMMAND is on the variable `exec-path'."
   (if (< emacs-major-version 27)
-      (executable-find command)
-    (executable-find command t)))
+      `(executable-find ,command)
+    `(executable-find ,command t)))
 
 (defun eshell-syntax-highlighting--goto-string-end (quote end)
   "Find end of string marked by QUOTE before END."
