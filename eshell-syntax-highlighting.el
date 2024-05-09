@@ -136,11 +136,11 @@
 
 (defvar eshell-syntax-highlighting--word-boundary-regexp "[^[:space:]&|;$'\"]*")
 
-(defun eshell-syntax-highlighting--executable-find (command)
+(defmacro eshell-syntax-highlighting--executable-find (command)
   "Check if COMMAND is on the variable `exec-path'."
   (if (< emacs-major-version 27)
-      (executable-find command)
-    (executable-find command t)))
+      `(executable-find ,command)
+    `(executable-find ,command t)))
 
 (defun eshell-syntax-highlighting--goto-string-end (quote end)
   "Find end of string marked by QUOTE before END."
@@ -318,7 +318,7 @@
 (defvar eshell-syntax-highlighting--control-flow-commands '("if" "unless" "while" "until"))
 
 (defun eshell-syntax-highlighting--parse-command (beg end command)
-  "Parse COMMAND in region (BEG, END) and highlight."
+  "In region (BEG, END), parse COMMAND and highlight."
   (let ((next-expected
          (cond
 
@@ -402,7 +402,7 @@
     (eshell-syntax-highlighting--parse-and-highlight next-expected end)))
 
 (defun eshell-syntax-highlighting--parse-and-highlight (expected end)
-  "Parse and highlight from point until END, expecting token of type EXPECTED."
+  "Parse and highlight EXPECTED token from point until END."
   ;; Whitespace
   (when (re-search-forward "\\s-*" end t)
     (eshell-syntax-highlighting--highlight
@@ -502,7 +502,7 @@
 
 (defmacro eshell-syntax-highlighting--command-running-p ()
   "Return non-nil if a foreground command is currently running."
-  (if (>= emacs-major-version 30)
+  (if (fboundp 'eshell-head-process)
       '(eshell-head-process)
     'eshell-current-command))
 
