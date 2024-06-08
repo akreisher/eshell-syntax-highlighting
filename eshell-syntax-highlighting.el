@@ -156,7 +156,7 @@
 
 (defun eshell-syntax-highlighting--highlight (beg end type)
   "Highlight word from BEG to END based on TYPE."
-  (set-text-properties beg end nil nil)
+  (remove-text-properties beg end '(face nil))
   (let ((face
          (cl-case type
            (default 'eshell-syntax-highlighting-default-face)
@@ -174,7 +174,7 @@
            (file-arg 'eshell-syntax-highlighting-file-arg-face)
            (substitution 'eshell-syntax-highlighting-command-substitution-face)
            (t 'eshell-syntax-highlighting-default-face))))
-    (add-face-text-property beg end face)))
+    (add-text-properties beg end (list 'font-lock-face face))))
 
 (defvar eshell-syntax-highlighting--indirect-elisp-buffer nil)
 
@@ -208,10 +208,21 @@
                           (scan-sexps beg 1)
                         (scan-error nil))
                       end)))
+      (remove-text-properties beg elisp-end '(font-lock-face nil))
       (with-current-buffer (eshell-syntax-highlighting--get-indirect-elisp-buffer)
         (narrow-to-region beg elisp-end)
         (font-lock-fontify-region beg elisp-end))
-      (goto-char elisp-end))))
+
+      ;; Copy face property set by font-lock to font-lock-face to avoid
+      ;; re-applying fontification if font-lock is enabled in the eshell mode buffer.
+      (goto-char beg)
+      (while (not (eq (point) elisp-end))
+        (let ((next-change (or (next-property-change (point) nil elisp-end) elisp-end)))
+          (put-text-property (point) next-change 'font-lock-face
+                             (get-text-property (point) 'face))
+          (remove-text-properties (point) next-change '(face nil))
+          (goto-char next-change))))))
+
 
 (defun eshell-syntax-highlighting--highlight-command-substitution (beg-symbol end-symbol end)
   "Highlight a command between BEG-SYMBOL and END-SYMBOL until END."
