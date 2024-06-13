@@ -219,7 +219,8 @@
       (while (not (eq (point) elisp-end))
         (let ((next-change (or (next-property-change (point) nil elisp-end) elisp-end)))
           (put-text-property (point) next-change 'font-lock-face
-                             (get-text-property (point) 'face))
+                             (or (get-text-property (point) 'face)
+                                 'eshell-syntax-highlighting-default-face))
           (remove-text-properties (point) next-change '(face nil))
           (goto-char next-change))))))
 
@@ -338,6 +339,7 @@
                 (looking-at (format "\\s-+\\(%s\\)\\s-+\\(in\\)\\s-+"
                                     eshell-syntax-highlighting--word-boundary-regexp)))
            (eshell-syntax-highlighting--highlight beg (point) 'builtin)
+           (eshell-syntax-highlighting--highlight (point) (match-end 0) 'default)
            (eshell-syntax-highlighting--highlight (match-beginning 1) (match-end 1) 'envvar)
            (eshell-syntax-highlighting--highlight (match-beginning 2) (match-end 2) 'builtin)
            (goto-char (match-end 0))
