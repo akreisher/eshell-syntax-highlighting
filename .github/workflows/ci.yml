@@ -45,4 +45,3 @@ jobs:
         with:
           check: ert
           file: eshell-syntax-highlighting-tests.el
-
