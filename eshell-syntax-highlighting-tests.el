@@ -32,6 +32,9 @@
           (eshell-syntax-highlighting-highlight-in-remote-dirs nil))
       (eshell-mode)
       (eshell-syntax-highlighting-mode)
+      ;; Work around prompt navigation bug in Emacs 25 causing
+      ;; the first user prompt to appear without highlighting.
+      (eshell-send-input)
       (goto-char (point-max))
       (insert command)
       (eshell-syntax-highlighting--enable-highlighting)
