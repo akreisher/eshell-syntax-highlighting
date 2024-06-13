@@ -39,3 +39,9 @@ jobs:
         uses: leotaku/elisp-check@master
         with:
           file: eshell-syntax-highlighting.el
+
+      - name: Test
+        uses: leotaku/elisp-check@master
+        with:
+          check: ert
+          file: eshell-syntax-highlighting-tests.el
