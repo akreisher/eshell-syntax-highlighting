@@ -523,6 +523,13 @@
     'eshell-current-command))
 
 
+(defmacro eshell-syntax-highlighting--bol ()
+  "Go to beginning of line, skipping prompt."
+  (if (>= emacs-major-version 30)
+      '(beginning-of-line)
+    '(eshell-bol)))
+
+
 (defun eshell-syntax-highlighting--enable-highlighting ()
   "Parse and highlight the command at the last Eshell prompt."
   (let ((non-essential t))
@@ -544,7 +551,7 @@
                 (if (and eshell-syntax-highlighting-highlight-previous-prompts
                          (setq begin
 		                       (save-excursion
-		                         (beginning-of-line)
+		                         (eshell-syntax-highlighting--bol)
 		                         (and (not (bolp)) (point))))
 	                     (>= pos begin)
 	                     (<= pos (line-end-position)))
