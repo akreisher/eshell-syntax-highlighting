@@ -535,7 +535,6 @@
   (let ((non-essential t))
     (when (and (eq major-mode 'eshell-mode)
                (not eshell-non-interactive-p)
-               (not mark-active)
                (not (eshell-syntax-highlighting--command-running-p))
                (or
                 eshell-syntax-highlighting-highlight-in-remote-dirs
