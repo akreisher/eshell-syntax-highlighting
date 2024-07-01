@@ -541,10 +541,12 @@
                 (not (file-remote-p default-directory))))
       (with-silent-modifications
         (save-excursion
-          (let ((pos (point)))
+          (let ((pos (point)) end)
             (if (>= pos eshell-last-output-end)
                 ;; Jump to eshell-last-output-end, which should be at prompt end.
-                (goto-char eshell-last-output-end)
+                (progn
+                  (goto-char eshell-last-output-end)
+                  (setq end (point-max)))
               (let (begin)
                 ;; Check if at a prompt prior to the current one.
                 (if (and eshell-syntax-highlighting-highlight-previous-input
@@ -554,12 +556,14 @@
 		                         (and (not (bolp)) (point))))
 	                     (>= pos begin)
 	                     (<= pos (line-end-position)))
-	                (goto-char begin)
+	                (progn (goto-char begin)
+                           (setq end (line-end-position)))
                   ;; Fallback to going to the end of the buffer and highlighting
                   ;; the current prompt.
                   (goto-char (point-max))
-                  (eshell-previous-prompt 0)))))
-          (eshell-syntax-highlighting--parse-and-highlight 'command (point-max)))))))
+                  (eshell-previous-prompt 0)
+                  (setq end (point-max)))))
+            (eshell-syntax-highlighting--parse-and-highlight 'command end)))))))
 
 
 ;;;###autoload
