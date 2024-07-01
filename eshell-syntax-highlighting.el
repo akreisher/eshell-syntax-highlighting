@@ -61,8 +61,8 @@
   :type 'boolean
   :group 'eshell-syntax-highlighting)
 
-(defcustom eshell-syntax-highlighting-highlight-previous-prompts t
-  "Whether to perform syntax highlighting on previous prompts."
+(defcustom eshell-syntax-highlighting-highlight-previous-input t
+  "Whether to perform syntax highlighting at previous prompts."
   :type 'boolean
   :group 'eshell-syntax-highlighting)
 
@@ -547,7 +547,7 @@
                 (goto-char eshell-last-output-end)
               (let (begin)
                 ;; Check if at a prompt prior to the current one.
-                (if (and eshell-syntax-highlighting-highlight-previous-prompts
+                (if (and eshell-syntax-highlighting-highlight-previous-input
                          (setq begin
 		                       (save-excursion
 		                         (eshell-syntax-highlighting--bol)
