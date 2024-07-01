@@ -56,12 +56,15 @@
   :type 'boolean
   :group 'eshell-syntax-highlighting)
 
-
 (defcustom eshell-syntax-highlighting-highlight-in-remote-dirs nil
   "Whether to perform syntax highlighting in remote directories."
   :type 'boolean
   :group 'eshell-syntax-highlighting)
 
+(defcustom eshell-syntax-highlighting-highlight-previous-prompts t
+  "Whether to perform syntax highlighting on previous prompts."
+  :type 'boolean
+  :group 'eshell-syntax-highlighting)
 
 (defface eshell-syntax-highlighting-default-face
   '((t :inherit default))
@@ -520,29 +523,43 @@
     'eshell-current-command))
 
 
-(defun eshell-syntax-highlighting--enabled-p ()
-  "Return whether syntax highlighting should be enabled in the current buffer."
-  (and (eq major-mode 'eshell-mode)
-       (not eshell-non-interactive-p)
-       (not mark-active)
-       (not (eshell-syntax-highlighting--command-running-p))
-       (or
-        eshell-syntax-highlighting-highlight-in-remote-dirs
-        (not (file-remote-p default-directory)))))
+(defmacro eshell-syntax-highlighting--bol ()
+  "Go to beginning of line, skipping prompt."
+  (if (>= emacs-major-version 30)
+      '(beginning-of-line)
+    '(eshell-bol)))
+
 
 (defun eshell-syntax-highlighting--enable-highlighting ()
   "Parse and highlight the command at the last Eshell prompt."
-  (let ((beg (point))
-        (non-essential t))
-    (when (eshell-syntax-highlighting--enabled-p)
+  (let ((non-essential t))
+    (when (and (eq major-mode 'eshell-mode)
+               (not eshell-non-interactive-p)
+               (not (eshell-syntax-highlighting--command-running-p))
+               (or
+                eshell-syntax-highlighting-highlight-in-remote-dirs
+                (not (file-remote-p default-directory))))
       (with-silent-modifications
         (save-excursion
-          (goto-char (point-max))
-          (eshell-previous-prompt 0)
-          (eshell-syntax-highlighting--parse-and-highlight 'command (point-max))))
-      ;; save-excursion marker is deleted when highlighting elisp,
-      ;; so explicitly pop back to initial point.
-      (goto-char beg))))
+          (let ((pos (point)))
+            (if (>= pos eshell-last-output-end)
+                ;; Jump to eshell-last-output-end, which should be at prompt end.
+                (goto-char eshell-last-output-end)
+              (let (begin)
+                ;; Check if at a prompt prior to the current one.
+                (if (and eshell-syntax-highlighting-highlight-previous-prompts
+                         (setq begin
+		                       (save-excursion
+		                         (eshell-syntax-highlighting--bol)
+		                         (and (not (bolp)) (point))))
+	                     (>= pos begin)
+	                     (<= pos (line-end-position)))
+	                (goto-char begin)
+                  ;; Fallback to going to the end of the buffer and highlighting
+                  ;; the current prompt.
+                  (goto-char (point-max))
+                  (eshell-previous-prompt 0)))))
+          (eshell-syntax-highlighting--parse-and-highlight 'command (point-max)))))))
 
 
 ;;;###autoload

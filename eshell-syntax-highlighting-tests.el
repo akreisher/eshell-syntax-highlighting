@@ -91,7 +91,9 @@
   (esht-test "echo $(message \"hello world\")"))
 
 (ert-deftest esht-test-lisp ()
-  (esht-test "(use-package eshell-syntax-highlighting :ensure t)"))
+  (esht-test "(use-package eshell-syntax-highlighting :ensure t)")
+  (esht-test "ls && (defun my-function () (message \"hello\")); echo 'hello'")
+  (esht-test "echo (message \"hello\")"))
 
 (ert-deftest esht-test-for-loop ()
   (esht-test "for i in #'(1 2 3) {echo \"i: $i\"}"))
