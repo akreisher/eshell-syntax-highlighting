@@ -33,18 +33,13 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl-lib)
-  (require 'esh-mode)
-  (require 'eshell)
-  (require 'em-alias)
-  (require 'em-dirs))
-
-
+(require 'cl-lib)
+(require 'eshell)
+(require 'esh-mode)
 (require 'esh-util)
 (require 'em-alias)
 (require 'em-prompt)
-
+(require 'em-dirs)
 
 (defgroup eshell-syntax-highlighting nil
   "Faces used to highlight the syntax of Eshell commands."
