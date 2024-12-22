@@ -104,5 +104,8 @@
 (ert-deftest esht-test-newline ()
   (esht-test "ls -la \\\nmy_dir"))
 
+(ert-deftest esht-test-invalid-inputs ()
+  (esht-test "echo \"${cat file1 file2 && (message \"hello\")}"))
+
 (provide 'eshell-syntax-highlighting-tests)
 ;;; eshell-syntax-highlighting-tests.el ends here
