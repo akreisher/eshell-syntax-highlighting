@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020-2024 Alex Kreisher
 
 ;; Author: Alex Kreisher <akreisher18@gmail.com>
-;; Version: 0.6
+;; Version: 0.7
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/akreisher/eshell-syntax-highlighting
